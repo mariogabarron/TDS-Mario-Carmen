@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!-- Hemos trasladado a FXML la estructura visual de la pantalla de gastos. -->
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="es.um.tds.gastos.controlador.GastosManager">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Agrupamos el título, el resumen de la consulta y los filtros. -->
+    <top>
+        <VBox spacing="8">
+            <padding>
+                <Insets top="0" right="0" bottom="15" left="0"/>
+            </padding>
+            <Label text="Gestión de gastos"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+            <Label fx:id="etiquetaTotal"/>
+            <VBox spacing="8">
+                <Label text="Filtrar gastos"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <MenuButton fx:id="menuMeses" text="Meses"/>
+                    <MenuButton fx:id="menuCategoriasFiltro" text="Categorías"/>
+                    <Button text="Aplicar filtros" onAction="#aplicarFiltros"/>
+                    <Button text="Limpiar filtros" onAction="#limpiarFiltros"/>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Desde:"/>
+                    <DatePicker fx:id="filtroDesde" editable="false"
+                                promptText="Sin límite inicial"/>
+                    <Label text="Hasta:"/>
+                    <DatePicker fx:id="filtroHasta" editable="false"
+                                promptText="Sin límite final"/>
+                </HBox>
+                <Label fx:id="estadoFiltros" text="Sin filtros" wrapText="true"/>
+            </VBox>
+        </VBox>
+    </top>
+
+    <!-- Definimos las tres representaciones de los mismos gastos consultados. -->
+    <center>
+        <TabPane fx:id="pestanas" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab fx:id="pestanaTabla" text="Tabla de gastos">
+                    <content>
+                        <TableView fx:id="tabla">
+                            <columns>
+                                <TableColumn fx:id="columnaFecha" text="Fecha" prefWidth="150"/>
+                                <TableColumn fx:id="columnaCategoria" text="Categoría" prefWidth="250"/>
+                                <TableColumn fx:id="columnaImporte" text="Importe" prefWidth="150"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No hay gastos que coincidan con la consulta."/>
+                            </placeholder>
+                        </TableView>
+                    </content>
+                </Tab>
+                <Tab text="Barras">
+                    <content>
+                        <StackPane>
+                            <BarChart fx:id="graficoBarras"
+                                      title="Gasto acumulado por categoría"
+                                      legendVisible="false" animated="false" categoryGap="15">
+                                <xAxis>
+                                    <NumberAxis label="Importe acumulado (€)" forceZeroInRange="true"/>
+                                </xAxis>
+                                <yAxis>
+                                    <CategoryAxis label="Categoría"/>
+                                </yAxis>
+                            </BarChart>
+                            <Label fx:id="mensajeBarras"
+                                   text="Añade gastos para ver su distribución."/>
+                        </StackPane>
+                    </content>
+                </Tab>
+                <Tab text="Circular">
+                    <content>
+                        <StackPane>
+                            <PieChart fx:id="graficoCircular" title="Distribución del gasto"
+                                      legendVisible="false" labelsVisible="true" animated="false"/>
+                            <Label fx:id="mensajeCircular"
+                                   text="Añade gastos para ver su distribución."/>
+                        </StackPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+
+    <!-- Asociamos los eventos del formulario a los métodos de GastosController. -->
+    <bottom>
+        <VBox spacing="12">
+            <padding>
+                <Insets top="15" right="0" bottom="0" left="0"/>
+            </padding>
+            <HBox spacing="10">
+                <Button fx:id="botonEditar" text="Editar seleccionado"
+                        onAction="#cargarGastoSeleccionado"/>
+                <Button fx:id="botonEliminar" text="Eliminar seleccionado"
+                        onAction="#eliminarGasto"/>
+            </HBox>
+            <Label fx:id="modoFormulario" text="Nuevo gasto"/>
+            <GridPane hgap="10" vgap="10">
+                <Label text="Importe (€):" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="campoImporte" promptText="Ejemplo: 12,50"
+                           GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="Fecha:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <DatePicker fx:id="campoFecha" editable="false"
+                            GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Categoría:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <ComboBox fx:id="campoCategoria" maxWidth="Infinity"
+                          GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Button text="Nueva categoría" onAction="#crearCategoria"
+                        GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+            </GridPane>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button fx:id="botonGuardar" text="Añadir gasto" onAction="#guardarGasto"/>
+                <Button text="Nuevo / cancelar edición" onAction="#prepararNuevoGasto"/>
+            </HBox>
+        </VBox>
+    </bottom>
+</BorderPane>
