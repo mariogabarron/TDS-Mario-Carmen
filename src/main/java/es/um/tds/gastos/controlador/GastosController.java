@@ -1,177 +1,113 @@
-package es.um.tds.gastos.vista;
+package es.um.tds.gastos.controlador;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import es.um.tds.gastos.aplicacion.GestionGastos;
 import es.um.tds.gastos.modelo.Categoria;
+import es.um.tds.gastos.modelo.FiltroGastos;
 import es.um.tds.gastos.modelo.Gasto;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import java.math.RoundingMode;
-import java.text.NumberFormat;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.PieChart;
-import javafx.scene.chart.XYChart;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.StackPane;
-
-import es.um.tds.gastos.modelo.FiltroGastos;
-
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.MenuButton;
-
-import java.time.Month;
-import java.time.format.TextStyle;
-import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /*
- * Hemos organizado la interfaz de gestión de gastos mediante un BorderPane.
- * Presentamos el formulario, la tabla, los gráficos y los controles de filtrado,
- * y delegamos las operaciones de gestión en la clase GestionGastos.
+ * Hemos separado el comportamiento de la pantalla de su estructura visual.
+ * Recibimos desde el FXML los controles y atendemos sus eventos, mientras
+ * delegamos las operaciones de gestión en GestionGastos.
  */
-public class VistaGastos extends BorderPane {
+public class GastosController {
 
-    /*
-     * Conservamos la referencia al servicio que recibe las operaciones solicitadas
-     * desde la interfaz y proporciona los datos que presentamos.
-     */
     private final GestionGastos gestion;
 
     /*
-     * Declaramos los controles con los que mostramos los gastos y recogemos
-     * el importe, la fecha y la categoría del formulario.
+     * Referenciamos los controles creados por FXMLLoader mediante sus fx:id.
+     * No los construimos aquí: utilizamos @FXML para recibir esas instancias.
      */
-    private final TableView<Gasto> tabla = new TableView<>();
-    private final TextField campoImporte = new TextField();
-    private final DatePicker campoFecha =
-        new DatePicker(LocalDate.now());
-    private final ComboBox<Categoria> campoCategoria =
-        new ComboBox<>();
+    @FXML private TableView<Gasto> tabla;
+    @FXML private TableColumn<Gasto, LocalDate> columnaFecha;
+    @FXML private TableColumn<Gasto, String> columnaCategoria;
+    @FXML private TableColumn<Gasto, BigDecimal> columnaImporte;
+    @FXML private TextField campoImporte;
+    @FXML private DatePicker campoFecha;
+    @FXML private ComboBox<Categoria> campoCategoria;
+    @FXML private Label modoFormulario;
+    @FXML private Label etiquetaTotal;
+    @FXML private Button botonGuardar;
+    @FXML private Button botonEditar;
+    @FXML private Button botonEliminar;
+    @FXML private TabPane pestanas;
+    @FXML private Tab pestanaTabla;
+    @FXML private BarChart<Number, String> graficoBarras;
+    @FXML private PieChart graficoCircular;
+    @FXML private Label mensajeBarras;
+    @FXML private Label mensajeCircular;
+    @FXML private MenuButton menuMeses;
+    @FXML private MenuButton menuCategoriasFiltro;
+    @FXML private DatePicker filtroDesde;
+    @FXML private DatePicker filtroHasta;
+    @FXML private Label estadoFiltros;
 
-    private final Label modoFormulario = new Label("Nuevo gasto");
-    private final Label etiquetaTotal = new Label();
-
-    private final Button botonGuardar = new Button("Añadir gasto");
-
-    /*
-     * Utilizamos esta referencia para distinguir el alta de la edición.
-     * Cuando su valor es null, registramos un gasto nuevo.
-     */
+    /* Distinguimos el alta de la edición mediante la referencia al gasto. */
     private Gasto gastoEnEdicion;
-    
-    /*
-     * Agrupamos las representaciones en pestañas y configuramos las barras
-     * con importes en el eje horizontal y categorías en el eje vertical.
-     */
-    private final TabPane pestanas = new TabPane();
 
-    private final NumberAxis ejeImportes = new NumberAxis();
-    private final CategoryAxis ejeCategorias = new CategoryAxis();
-
-    private final BarChart<Number, String> graficoBarras =
-        new BarChart<>(ejeImportes, ejeCategorias);
-
-    private final PieChart graficoCircular = new PieChart();
-
-    private final Label mensajeBarras =
-        new Label("Añade gastos para ver su distribución.");
-
-    private final Label mensajeCircular =
-        new Label("Añade gastos para ver su distribución.");
-
-    /*
-     * Hemos elegido el formato monetario de España para presentar los importes
-     * con su símbolo de moneda y sus separadores correspondientes.
-     */
     private final NumberFormat formatoMoneda =
-    	NumberFormat.getCurrencyInstance(
-            Locale.forLanguageTag("es-ES")
-        );
-    private final MenuButton menuMeses =
-    	new MenuButton("Meses");
+        NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-ES"));
 
-    private final MenuButton menuCategoriasFiltro =
-    	new MenuButton("Categorías");
+    /* Conservamos las opciones dinámicas y el filtro actualmente aplicado. */
+    private final Map<Month, CheckMenuItem> opcionesMeses = new LinkedHashMap<>();
+    private final Map<Categoria, CheckMenuItem> opcionesCategorias = new LinkedHashMap<>();
+    private FiltroGastos filtroActivo = FiltroGastos.sinRestricciones();
 
     /*
-     * Relacionamos cada mes y categoría con su casilla de selección.
-     * Con LinkedHashMap conservamos el orden de incorporación de las opciones.
+     * Recibimos el mismo servicio que conserva ViewController. En el constructor
+     * no accedemos a los controles porque todavía no se ha cargado el FXML.
      */
-    private final Map<Month, CheckMenuItem> opcionesMeses =
-    	new LinkedHashMap<>();
-
-    private final Map<Categoria, CheckMenuItem> opcionesCategorias =
-    	new LinkedHashMap<>();
-
-    private final DatePicker filtroDesde = new DatePicker();
-    private final DatePicker filtroHasta = new DatePicker();
-
-    private final Label estadoFiltros =
-    	new Label("Sin filtros");
+    public GastosController(GestionGastos gestion) {
+        this.gestion = Objects.requireNonNull(gestion);
+    }
 
     /*
-     * Mantenemos separado el filtro aplicado de las selecciones de los controles.
-     * Inicialmente consultamos los gastos sin restricciones.
+     * Inicializamos el comportamiento cuando FXMLLoader ya ha inyectado los
+     * controles. Las dimensiones, los textos y la distribución están en el FXML.
      */
-    private FiltroGastos filtroActivo =
-    	FiltroGastos.sinRestricciones();
-
-    /*
-     * Recibimos el servicio de gestión y construimos las distintas zonas de la
-     * ventana. Cargamos las categorías disponibles y presentamos la consulta inicial.
-     */
-    public VistaGastos(GestionGastos gestion) {
-        this.gestion = gestion;
-
-        setPadding(new Insets(20));
-
+    @FXML
+    private void initialize() {
         configurarTabla();
-        configurarFormulario();
-        configurarVisualizaciones();
-
-        Label titulo = new Label("Gestión de gastos");
-        titulo.setStyle(
-            "-fx-font-size: 24px; -fx-font-weight: bold;"
-        );
-
-        VBox cabecera = new VBox(8, titulo, etiquetaTotal);
-        cabecera.getChildren().add(crearPanelFiltros());
-        cabecera.setPadding(new Insets(0, 0, 15, 0));
-
-        setTop(cabecera);
-
-        campoCategoria.getItems().setAll(
-            gestion.getCategorias()
-        );
-
+        configurarComportamiento();
+        configurarFiltros();
+        campoCategoria.getItems().setAll(gestion.getCategorias());
         prepararNuevoGasto();
         actualizarTabla();
     }
@@ -181,9 +117,6 @@ public class VistaGastos extends BorderPane {
      * cómo obtenemos y representamos los valores de cada gasto.
      */
     private void configurarTabla() {
-        TableColumn<Gasto, LocalDate> columnaFecha =
-            new TableColumn<>("Fecha");
-
         /*
          * Adaptamos la fecha de cada gasto al valor observable que necesita la tabla.
          */
@@ -214,17 +147,11 @@ public class VistaGastos extends BorderPane {
             }
         );
 
-        TableColumn<Gasto, String> columnaCategoria =
-            new TableColumn<>("Categoría");
-
         columnaCategoria.setCellValueFactory(datos ->
             new ReadOnlyStringWrapper(
                 datos.getValue().getCategoria().getNombre()
             )
         );
-
-        TableColumn<Gasto, BigDecimal> columnaImporte =
-            new TableColumn<>("Importe");
 
         columnaImporte.setCellValueFactory(datos ->
             new ReadOnlyObjectWrapper<>(
@@ -249,88 +176,47 @@ public class VistaGastos extends BorderPane {
                 }
             }
         );
+    }
 
-        columnaFecha.setPrefWidth(150);
-        columnaCategoria.setPrefWidth(250);
-        columnaImporte.setPrefWidth(150);
-
-        tabla.getColumns().add(columnaFecha);
-        tabla.getColumns().add(columnaCategoria);
-        tabla.getColumns().add(columnaImporte);
-
-        tabla.setPlaceholder(
-            new Label("Todavía no hay gastos registrados.")
+    /*
+     * Vinculamos la selección con los botones y sincronizamos los mensajes
+     * de los gráficos. Al salir de la tabla retiramos la selección visible.
+     */
+    private void configurarComportamiento() {
+        botonEditar.disableProperty().bind(
+            tabla.getSelectionModel().selectedItemProperty().isNull()
+        );
+        botonEliminar.disableProperty().bind(
+            tabla.getSelectionModel().selectedItemProperty().isNull()
+        );
+        mensajeBarras.visibleProperty().bind(graficoBarras.visibleProperty().not());
+        mensajeBarras.managedProperty().bind(mensajeBarras.visibleProperty());
+        mensajeCircular.visibleProperty().bind(graficoCircular.visibleProperty().not());
+        mensajeCircular.managedProperty().bind(mensajeCircular.visibleProperty());
+        pestanas.getSelectionModel().selectedItemProperty().addListener(
+            (observable, anterior, actual) -> {
+                if (actual != pestanaTabla) {
+                    tabla.getSelectionModel().clearSelection();
+                }
+            }
         );
     }
 
     /*
-     * Organizamos los campos y botones del formulario y vinculamos sus eventos
-     * con las operaciones de alta, edición, borrado y creación de categorías.
+     * Generamos las opciones que dependen de los meses y las categorías.
+     * Hemos declarado los menús y los botones que las contienen en el FXML.
      */
-    private void configurarFormulario() {
-        campoImporte.setPromptText("Ejemplo: 12,50");
-
-        campoCategoria.setMaxWidth(Double.MAX_VALUE);
-
-        /* Hemos limitado la entrada de la fecha al selector de calendario del campo. */
-        campoFecha.setEditable(false);
-
-        Button botonCategoria = new Button("Nueva categoría");
-        botonCategoria.setOnAction(event -> crearCategoria());
-
-        GridPane campos = new GridPane();
-        campos.setHgap(10);
-        campos.setVgap(10);
-
-        campos.addRow(0, new Label("Importe (€):"), campoImporte);
-        campos.addRow(1, new Label("Fecha:"), campoFecha);
-        campos.addRow(
-            2,
-            new Label("Categoría:"),
-            campoCategoria,
-            botonCategoria
-        );
-
-        Button botonNuevo = new Button("Nuevo / cancelar edición");
-        Button botonEditar = new Button("Editar seleccionado");
-        Button botonEliminar = new Button("Eliminar seleccionado");
-
-        botonGuardar.setOnAction(event -> guardarGasto());
-        botonNuevo.setOnAction(event -> prepararNuevoGasto());
-        botonEditar.setOnAction(event -> cargarGastoSeleccionado());
-        botonEliminar.setOnAction(event -> eliminarGasto());
-
-        /*
-         * Vinculamos la disponibilidad de editar y eliminar con la selección
-         * de la tabla, de modo que ambos botones se desactivan si no hay una fila elegida.
-         */
-        botonEditar.disableProperty().bind(
-            tabla.getSelectionModel()
-                .selectedItemProperty()
-                .isNull()
-        );
-
-        botonEliminar.disableProperty().bind(
-            tabla.getSelectionModel()
-                .selectedItemProperty()
-                .isNull()
-        );
-
-        HBox acciones = new HBox(
-            10, botonGuardar, botonNuevo
-        );
-        acciones.setAlignment(Pos.CENTER_LEFT);
-
-        HBox accionesTabla = new HBox(
-            10, botonEditar, botonEliminar
-        );
-
-        VBox panel = new VBox(
-            12, accionesTabla, modoFormulario, campos, acciones
-        );
-        panel.setPadding(new Insets(15, 0, 0, 0));
-
-        setBottom(panel);
+    private void configurarFiltros() {
+        for (Month mes : Month.values()) {
+            String nombre = mes.getDisplayName(
+                TextStyle.FULL, Locale.forLanguageTag("es-ES")
+            );
+            CheckMenuItem opcion = new CheckMenuItem(nombre);
+            opcionesMeses.put(mes, opcion);
+            menuMeses.getItems().add(opcion);
+        }
+        actualizarCategoriasFiltro();
+        menuCategoriasFiltro.setOnShowing(evento -> actualizarCategoriasFiltro());
     }
 
     /*
@@ -338,6 +224,7 @@ public class VistaGastos extends BorderPane {
      * según exista un gasto en edición. Mostramos los errores de conversión
      * y validación sin completar la limpieza del formulario cuando se producen.
      */
+    @FXML
     private void guardarGasto() {
         try {
             /*
@@ -381,6 +268,7 @@ public class VistaGastos extends BorderPane {
      * Copiamos al formulario los datos del gasto seleccionado y conservamos
      * su referencia para que el siguiente guardado solicite una modificación.
      */
+    @FXML
     private void cargarGastoSeleccionado() {
         Gasto seleccionado =
             tabla.getSelectionModel().getSelectedItem();
@@ -405,6 +293,7 @@ public class VistaGastos extends BorderPane {
      * Restablecemos el formulario para registrar un gasto nuevo. Cancelamos
      * la referencia de edición, limpiamos la selección y proponemos la fecha actual.
      */
+    @FXML
     private void prepararNuevoGasto() {
         gastoEnEdicion = null;
 
@@ -422,6 +311,7 @@ public class VistaGastos extends BorderPane {
      * Solicitamos confirmación antes de eliminar el gasto seleccionado.
      * Solo ejecutamos el borrado cuando recibimos una respuesta afirmativa.
      */
+    @FXML
     private void eliminarGasto() {
         Gasto seleccionado =
             tabla.getSelectionModel().getSelectedItem();
@@ -457,6 +347,7 @@ public class VistaGastos extends BorderPane {
      * servicio. Si la operación termina correctamente, renovamos el desplegable
      * y seleccionamos la categoría creada.
      */
+    @FXML
     private void crearCategoria() {
         TextInputDialog dialogo = new TextInputDialog();
         dialogo.setTitle("Nueva categoría");
@@ -513,7 +404,7 @@ public class VistaGastos extends BorderPane {
 
         actualizarGraficos(gastos);
     }
-    
+
     /*
      * Presentamos el mensaje de error mediante un diálogo y esperamos
      * a que el usuario lo cierre antes de continuar.
@@ -525,84 +416,7 @@ public class VistaGastos extends BorderPane {
         aviso.setContentText(mensaje);
         aviso.showAndWait();
     }
-    
-    /*
-     * Configuramos los ejes, los gráficos y las pestañas de consulta.
-     * También vinculamos los mensajes informativos con la ausencia de datos.
-     */
-    private void configurarVisualizaciones() {
-        ejeImportes.setLabel("Importe acumulado (€)");
-        ejeImportes.setForceZeroInRange(true);
 
-        ejeCategorias.setLabel("Categoría");
-
-        graficoBarras.setTitle("Gasto acumulado por categoría");
-        graficoBarras.setLegendVisible(false);
-        graficoBarras.setAnimated(false);
-        graficoBarras.setCategoryGap(15);
-
-        graficoCircular.setTitle("Distribución del gasto");
-        graficoCircular.setLegendVisible(false);
-        graficoCircular.setLabelsVisible(true);
-        graficoCircular.setAnimated(false);
-
-        /*
-         * Mostramos los mensajes cuando ocultamos los gráficos por falta de datos.
-         * Sincronizamos también la participación de los mensajes en la distribución visual.
-         */
-        mensajeBarras.visibleProperty().bind(
-            graficoBarras.visibleProperty().not()
-        );
-
-        mensajeBarras.managedProperty().bind(
-            mensajeBarras.visibleProperty()
-        );
-
-        mensajeCircular.visibleProperty().bind(
-            graficoCircular.visibleProperty().not()
-        );
-
-        mensajeCircular.managedProperty().bind(
-            mensajeCircular.visibleProperty()
-        );
-
-        StackPane panelBarras = new StackPane(
-            graficoBarras, mensajeBarras
-        );
-
-        StackPane panelCircular = new StackPane(
-            graficoCircular, mensajeCircular
-        );
-
-        Tab pestañaTabla = new Tab("Tabla de gastos", tabla);
-        Tab pestañaBarras = new Tab("Barras", panelBarras);
-        Tab pestañaCircular = new Tab("Circular", panelCircular);
-
-        pestanas.getTabs().setAll(
-            pestañaTabla,
-            pestañaBarras,
-            pestañaCircular
-        );
-
-        pestanas.setTabClosingPolicy(
-            TabPane.TabClosingPolicy.UNAVAILABLE
-        );
-
-        /*
-         * Limpiamos la selección al abandonar la tabla para no mantener habilitadas
-         * las acciones de edición y borrado sobre una fila que ha quedado oculta.
-         */
-        pestanas.getSelectionModel()
-            .selectedItemProperty()
-            .addListener((observable, anterior, actual) -> {
-                if (actual != pestañaTabla) {
-                    tabla.getSelectionModel().clearSelection();
-                }
-            });
-
-        setCenter(pestanas);
-    }
-    
     /*
      * Solicitamos los importes acumulados por categoría y reconstruimos ambas
      * representaciones a partir de los gastos recibidos, respetando así el filtrado.
@@ -696,9 +510,10 @@ public class VistaGastos extends BorderPane {
 
         graficoBarras.getData().add(serie);
     }
-    
+
     /*
      * Incorporamos las categorías que todavía no tienen una opción de filtrado.
+     * Conservamos las casillas existentes y sus selecciones.
      */
     private void actualizarCategoriasFiltro() {
         for (Categoria categoria : gestion.getCategorias()) {
@@ -712,12 +527,13 @@ public class VistaGastos extends BorderPane {
             }
         }
     }
-    
+
     /*
      * Recogemos las selecciones y construimos un filtro nuevo. Lo activamos
      * tras su construcción y actualizamos la consulta. Si la validación del
      * constructor falla, conservamos el filtro aplicado anteriormente.
      */
+    @FXML
     private void aplicarFiltros() {
         Set<Month> mesesSeleccionados =
             opcionesMeses.entrySet().stream()
@@ -765,11 +581,12 @@ public class VistaGastos extends BorderPane {
             mostrarError(e.getMessage());
         }
     }
-    
+
     /*
      * Desmarcamos las opciones, retiramos los límites de fecha y restablecemos
      * una consulta sin restricciones. Además, cancelamos la edición pendiente.
      */
+    @FXML
     private void limpiarFiltros() {
         opcionesMeses.values().forEach(
             opcion -> opcion.setSelected(false)
@@ -789,73 +606,5 @@ public class VistaGastos extends BorderPane {
         prepararNuevoGasto();
         actualizarTabla();
     }
-    
-    /*
-     * Construimos los controles de selección múltiple y los límites temporales.
-     * Asociamos los botones con la aplicación y la limpieza de los filtros.
-     */
-    private VBox crearPanelFiltros() {
-        for (Month mes : Month.values()) {
-            String nombre = mes.getDisplayName(
-                TextStyle.FULL,
-                Locale.forLanguageTag("es-ES")
-            );
 
-            CheckMenuItem opcion = new CheckMenuItem(nombre);
-
-            opcionesMeses.put(mes, opcion);
-            menuMeses.getItems().add(opcion);
-        }
-
-        actualizarCategoriasFiltro();
-
-        /*
-         * Revisamos las categorías al abrir el menú para incluir las que se hayan
-         * creado desde el formulario sin perder las selecciones anteriores.
-         */
-        menuCategoriasFiltro.setOnShowing(
-            evento -> actualizarCategoriasFiltro()
-        );
-
-        filtroDesde.setPromptText("Sin límite inicial");
-        filtroHasta.setPromptText("Sin límite final");
-
-        /*
-         * Seleccionamos los límites temporales mediante los calendarios de los
-         * campos y deshabilitamos la escritura directa de sus fechas.
-         */
-        filtroDesde.setEditable(false);
-        filtroHasta.setEditable(false);
-
-        Button aplicar = new Button("Aplicar filtros");
-        Button limpiar = new Button("Limpiar filtros");
-
-        aplicar.setOnAction(evento -> aplicarFiltros());
-        limpiar.setOnAction(evento -> limpiarFiltros());
-
-        HBox selecciones = new HBox(
-            10,
-            menuMeses,
-            menuCategoriasFiltro,
-            aplicar,
-            limpiar
-        );
-
-        HBox fechas = new HBox(
-            10,
-            new Label("Desde:"),
-            filtroDesde,
-            new Label("Hasta:"),
-            filtroHasta
-        );
-
-        return new VBox(
-            8,
-            new Label("Filtrar gastos"),
-            selecciones,
-            fechas,
-            estadoFiltros
-        );
-    }
-    
 }
