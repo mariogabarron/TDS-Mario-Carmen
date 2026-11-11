@@ -42,8 +42,8 @@ public class ViewController {
          * Proporcionamos el servicio al controlador declarado en fx:controller.
          */
         loader.setControllerFactory(tipo -> {
-            if (tipo == GastosController.class) {
-                return new GastosController(gestion);
+            if (tipo == GastosManager.class) {
+                return new GastosManager(gestion);
             }
             throw new IllegalArgumentException(
                 "Controlador no configurado: " + tipo.getName()

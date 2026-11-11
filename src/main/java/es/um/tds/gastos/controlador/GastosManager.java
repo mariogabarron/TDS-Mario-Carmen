@@ -47,7 +47,7 @@ import javafx.scene.control.TextInputDialog;
  * Recibimos desde el FXML los controles y atendemos sus eventos, mientras
  * delegamos las operaciones de gestión en GestionGastos.
  */
-public class GastosController {
+public class GastosManager {
 
     private final GestionGastos gestion;
 
@@ -94,7 +94,7 @@ public class GastosController {
      * Recibimos el mismo servicio que conserva ViewController. En el constructor
      * no accedemos a los controles porque todavía no se ha cargado el FXML.
      */
-    public GastosController(GestionGastos gestion) {
+    public GastosManager(GestionGastos gestion) {
         this.gestion = Objects.requireNonNull(gestion);
     }
 
