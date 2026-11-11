@@ -27,13 +27,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -54,10 +52,23 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/*
+ * Hemos organizado la interfaz de gestión de gastos mediante un BorderPane.
+ * Presentamos el formulario, la tabla, los gráficos y los controles de filtrado,
+ * y delegamos las operaciones de gestión en la clase GestionGastos.
+ */
 public class VistaGastos extends BorderPane {
 
+    /*
+     * Conservamos la referencia al servicio que recibe las operaciones solicitadas
+     * desde la interfaz y proporciona los datos que presentamos.
+     */
     private final GestionGastos gestion;
 
+    /*
+     * Declaramos los controles con los que mostramos los gastos y recogemos
+     * el importe, la fecha y la categoría del formulario.
+     */
     private final TableView<Gasto> tabla = new TableView<>();
     private final TextField campoImporte = new TextField();
     private final DatePicker campoFecha =
@@ -70,8 +81,16 @@ public class VistaGastos extends BorderPane {
 
     private final Button botonGuardar = new Button("Añadir gasto");
 
+    /*
+     * Utilizamos esta referencia para distinguir el alta de la edición.
+     * Cuando su valor es null, registramos un gasto nuevo.
+     */
     private Gasto gastoEnEdicion;
     
+    /*
+     * Agrupamos las representaciones en pestañas y configuramos las barras
+     * con importes en el eje horizontal y categorías en el eje vertical.
+     */
     private final TabPane pestanas = new TabPane();
 
     private final NumberAxis ejeImportes = new NumberAxis();
@@ -88,6 +107,10 @@ public class VistaGastos extends BorderPane {
     private final Label mensajeCircular =
         new Label("Añade gastos para ver su distribución.");
 
+    /*
+     * Hemos elegido el formato monetario de España para presentar los importes
+     * con su símbolo de moneda y sus separadores correspondientes.
+     */
     private final NumberFormat formatoMoneda =
     	NumberFormat.getCurrencyInstance(
             Locale.forLanguageTag("es-ES")
@@ -98,6 +121,10 @@ public class VistaGastos extends BorderPane {
     private final MenuButton menuCategoriasFiltro =
     	new MenuButton("Categorías");
 
+    /*
+     * Relacionamos cada mes y categoría con su casilla de selección.
+     * Con LinkedHashMap conservamos el orden de incorporación de las opciones.
+     */
     private final Map<Month, CheckMenuItem> opcionesMeses =
     	new LinkedHashMap<>();
 
@@ -110,9 +137,17 @@ public class VistaGastos extends BorderPane {
     private final Label estadoFiltros =
     	new Label("Sin filtros");
 
+    /*
+     * Mantenemos separado el filtro aplicado de las selecciones de los controles.
+     * Inicialmente consultamos los gastos sin restricciones.
+     */
     private FiltroGastos filtroActivo =
     	FiltroGastos.sinRestricciones();
 
+    /*
+     * Recibimos el servicio de gestión y construimos las distintas zonas de la
+     * ventana. Cargamos las categorías disponibles y presentamos la consulta inicial.
+     */
     public VistaGastos(GestionGastos gestion) {
         this.gestion = gestion;
 
@@ -141,10 +176,17 @@ public class VistaGastos extends BorderPane {
         actualizarTabla();
     }
 
+    /*
+     * Definimos las columnas de fecha, categoría e importe y especificamos
+     * cómo obtenemos y representamos los valores de cada gasto.
+     */
     private void configurarTabla() {
         TableColumn<Gasto, LocalDate> columnaFecha =
             new TableColumn<>("Fecha");
 
+        /*
+         * Adaptamos la fecha de cada gasto al valor observable que necesita la tabla.
+         */
         columnaFecha.setCellValueFactory(datos ->
             new ReadOnlyObjectWrapper<>(
                 datos.getValue().getFecha()
@@ -154,6 +196,10 @@ public class VistaGastos extends BorderPane {
         DateTimeFormatter formatoFecha =
             DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+        /*
+         * Personalizamos la representación de las fechas. Limpiamos el texto de
+         * las celdas vacías para evitar que conserven datos al reutilizarse.
+         */
         columnaFecha.setCellFactory(columna ->
             new TableCell<Gasto, LocalDate>() {
                 @Override
@@ -186,6 +232,10 @@ public class VistaGastos extends BorderPane {
             )
         );
 
+        /*
+         * Escribimos el importe en notación decimal y añadimos el símbolo del euro.
+         * También retiramos el texto cuando la celda deja de contener un valor.
+         */
         columnaImporte.setCellFactory(columna ->
             new TableCell<Gasto, BigDecimal>() {
                 @Override
@@ -213,12 +263,16 @@ public class VistaGastos extends BorderPane {
         );
     }
 
+    /*
+     * Organizamos los campos y botones del formulario y vinculamos sus eventos
+     * con las operaciones de alta, edición, borrado y creación de categorías.
+     */
     private void configurarFormulario() {
         campoImporte.setPromptText("Ejemplo: 12,50");
 
         campoCategoria.setMaxWidth(Double.MAX_VALUE);
 
-        // TODO: Por ahora la fecha se elige desde el calendario.
+        /* Hemos limitado la entrada de la fecha al selector de calendario del campo. */
         campoFecha.setEditable(false);
 
         Button botonCategoria = new Button("Nueva categoría");
@@ -246,6 +300,10 @@ public class VistaGastos extends BorderPane {
         botonEditar.setOnAction(event -> cargarGastoSeleccionado());
         botonEliminar.setOnAction(event -> eliminarGasto());
 
+        /*
+         * Vinculamos la disponibilidad de editar y eliminar con la selección
+         * de la tabla, de modo que ambos botones se desactivan si no hay una fila elegida.
+         */
         botonEditar.disableProperty().bind(
             tabla.getSelectionModel()
                 .selectedItemProperty()
@@ -275,8 +333,17 @@ public class VistaGastos extends BorderPane {
         setBottom(panel);
     }
 
+    /*
+     * Leemos los datos del formulario y solicitamos el alta o la modificación
+     * según exista un gasto en edición. Mostramos los errores de conversión
+     * y validación sin completar la limpieza del formulario cuando se producen.
+     */
     private void guardarGasto() {
         try {
+            /*
+             * Eliminamos los espacios exteriores y normalizamos la coma decimal
+             * antes de construir el importe a partir del texto.
+             */
             String textoImporte = campoImporte.getText()
                 .strip()
                 .replace(',', '.');
@@ -310,6 +377,10 @@ public class VistaGastos extends BorderPane {
         }
     }
 
+    /*
+     * Copiamos al formulario los datos del gasto seleccionado y conservamos
+     * su referencia para que el siguiente guardado solicite una modificación.
+     */
     private void cargarGastoSeleccionado() {
         Gasto seleccionado =
             tabla.getSelectionModel().getSelectedItem();
@@ -330,6 +401,10 @@ public class VistaGastos extends BorderPane {
         botonGuardar.setText("Guardar cambios");
     }
 
+    /*
+     * Restablecemos el formulario para registrar un gasto nuevo. Cancelamos
+     * la referencia de edición, limpiamos la selección y proponemos la fecha actual.
+     */
     private void prepararNuevoGasto() {
         gastoEnEdicion = null;
 
@@ -343,6 +418,10 @@ public class VistaGastos extends BorderPane {
         botonGuardar.setText("Añadir gasto");
     }
 
+    /*
+     * Solicitamos confirmación antes de eliminar el gasto seleccionado.
+     * Solo ejecutamos el borrado cuando recibimos una respuesta afirmativa.
+     */
     private void eliminarGasto() {
         Gasto seleccionado =
             tabla.getSelectionModel().getSelectedItem();
@@ -358,6 +437,10 @@ public class VistaGastos extends BorderPane {
         confirmacion.setHeaderText("¿Eliminar este gasto?");
         confirmacion.setContentText(seleccionado.toString());
 
+        /*
+         * Interpretamos el cierre del diálogo o cualquier respuesta distinta de OK
+         * como una cancelación del borrado.
+         */
         boolean confirmado = confirmacion.showAndWait()
             .filter(respuesta -> respuesta == ButtonType.OK)
             .isPresent();
@@ -369,6 +452,11 @@ public class VistaGastos extends BorderPane {
         }
     }
 
+    /*
+     * Solicitamos el nombre de una categoría y delegamos su creación en el
+     * servicio. Si la operación termina correctamente, renovamos el desplegable
+     * y seleccionamos la categoría creada.
+     */
     private void crearCategoria() {
         TextInputDialog dialogo = new TextInputDialog();
         dialogo.setTitle("Nueva categoría");
@@ -390,10 +478,18 @@ public class VistaGastos extends BorderPane {
         });
     }
 
+    /*
+     * Consultamos los gastos que cumplen el filtro activo y utilizamos esa
+     * misma lista para renovar la tabla, calcular el total y actualizar los gráficos.
+     */
     private void actualizarTabla() {
         List<Gasto> gastos =
             gestion.filtrarGastos(filtroActivo);
 
+        /*
+         * Sumamos con BigDecimal únicamente los importes incluidos en la consulta
+         * para mantener la precisión decimal del total mostrado.
+         */
         BigDecimal total = gastos.stream()
             .map(Gasto::getImporte)
             .reduce(
@@ -418,6 +514,10 @@ public class VistaGastos extends BorderPane {
         actualizarGraficos(gastos);
     }
     
+    /*
+     * Presentamos el mensaje de error mediante un diálogo y esperamos
+     * a que el usuario lo cierre antes de continuar.
+     */
     private void mostrarError(String mensaje) {
         Alert aviso = new Alert(Alert.AlertType.ERROR);
         aviso.setTitle("Revisa los datos");
@@ -426,6 +526,10 @@ public class VistaGastos extends BorderPane {
         aviso.showAndWait();
     }
     
+    /*
+     * Configuramos los ejes, los gráficos y las pestañas de consulta.
+     * También vinculamos los mensajes informativos con la ausencia de datos.
+     */
     private void configurarVisualizaciones() {
         ejeImportes.setLabel("Importe acumulado (€)");
         ejeImportes.setForceZeroInRange(true);
@@ -442,6 +546,10 @@ public class VistaGastos extends BorderPane {
         graficoCircular.setLabelsVisible(true);
         graficoCircular.setAnimated(false);
 
+        /*
+         * Mostramos los mensajes cuando ocultamos los gráficos por falta de datos.
+         * Sincronizamos también la participación de los mensajes en la distribución visual.
+         */
         mensajeBarras.visibleProperty().bind(
             graficoBarras.visibleProperty().not()
         );
@@ -480,6 +588,10 @@ public class VistaGastos extends BorderPane {
             TabPane.TabClosingPolicy.UNAVAILABLE
         );
 
+        /*
+         * Limpiamos la selección al abandonar la tabla para no mantener habilitadas
+         * las acciones de edición y borrado sobre una fila que ha quedado oculta.
+         */
         pestanas.getSelectionModel()
             .selectedItemProperty()
             .addListener((observable, anterior, actual) -> {
@@ -491,6 +603,10 @@ public class VistaGastos extends BorderPane {
         setCenter(pestanas);
     }
     
+    /*
+     * Solicitamos los importes acumulados por categoría y reconstruimos ambas
+     * representaciones a partir de los gastos recibidos, respetando así el filtrado.
+     */
     private void actualizarGraficos(List<Gasto> gastos) {
         Map<Categoria, BigDecimal> totales =
             gestion.calcularTotalesPorCategoria(gastos);
@@ -500,6 +616,10 @@ public class VistaGastos extends BorderPane {
         graficoBarras.setVisible(hayDatos);
         graficoCircular.setVisible(hayDatos);
 
+        /*
+         * Retiramos las representaciones anteriores para que las sucesivas
+         * actualizaciones no acumulen barras ni sectores duplicados.
+         */
         graficoBarras.getData().clear();
         graficoCircular.getData().clear();
 
@@ -515,6 +635,10 @@ public class VistaGastos extends BorderPane {
 
         serie.setName("Gasto por categoría");
 
+        /*
+         * Ordenamos las categorías de mayor a menor importe y resolvemos
+         * los empates mediante su nombre.
+         */
         List<Map.Entry<Categoria, BigDecimal>> ordenados =
             totales.entrySet().stream()
                 .sorted(
@@ -531,6 +655,10 @@ public class VistaGastos extends BorderPane {
             String nombre = entrada.getKey().getNombre();
             BigDecimal importe = entrada.getValue();
 
+            /*
+             * Convertimos el importe a double únicamente para su representación
+             * gráfica; conservamos BigDecimal en los cálculos monetarios.
+             */
             serie.getData().add(
                 new XYChart.Data<>(
                     importe.doubleValue(),
@@ -538,6 +666,11 @@ public class VistaGastos extends BorderPane {
                 )
             );
 
+            /*
+             * Calculamos el porcentaje sobre el total de la consulta y lo redondeamos
+             * a una cifra decimal para mostrarlo en la etiqueta. Construimos los
+             * sectores con los importes, no con estos porcentajes redondeados.
+             */
             BigDecimal porcentaje = importe
                 .multiply(new BigDecimal("100"))
                 .divide(
@@ -564,6 +697,9 @@ public class VistaGastos extends BorderPane {
         graficoBarras.getData().add(serie);
     }
     
+    /*
+     * Incorporamos las categorías que todavía no tienen una opción de filtrado.
+     */
     private void actualizarCategoriasFiltro() {
         for (Categoria categoria : gestion.getCategorias()) {
             if (!opcionesCategorias.containsKey(categoria)) {
@@ -577,6 +713,11 @@ public class VistaGastos extends BorderPane {
         }
     }
     
+    /*
+     * Recogemos las selecciones y construimos un filtro nuevo. Lo activamos
+     * tras su construcción y actualizamos la consulta. Si la validación del
+     * constructor falla, conservamos el filtro aplicado anteriormente.
+     */
     private void aplicarFiltros() {
         Set<Month> mesesSeleccionados =
             opcionesMeses.entrySet().stream()
@@ -625,6 +766,10 @@ public class VistaGastos extends BorderPane {
         }
     }
     
+    /*
+     * Desmarcamos las opciones, retiramos los límites de fecha y restablecemos
+     * una consulta sin restricciones. Además, cancelamos la edición pendiente.
+     */
     private void limpiarFiltros() {
         opcionesMeses.values().forEach(
             opcion -> opcion.setSelected(false)
@@ -645,6 +790,10 @@ public class VistaGastos extends BorderPane {
         actualizarTabla();
     }
     
+    /*
+     * Construimos los controles de selección múltiple y los límites temporales.
+     * Asociamos los botones con la aplicación y la limpieza de los filtros.
+     */
     private VBox crearPanelFiltros() {
         for (Month mes : Month.values()) {
             String nombre = mes.getDisplayName(
@@ -660,6 +809,10 @@ public class VistaGastos extends BorderPane {
 
         actualizarCategoriasFiltro();
 
+        /*
+         * Revisamos las categorías al abrir el menú para incluir las que se hayan
+         * creado desde el formulario sin perder las selecciones anteriores.
+         */
         menuCategoriasFiltro.setOnShowing(
             evento -> actualizarCategoriasFiltro()
         );
@@ -667,6 +820,10 @@ public class VistaGastos extends BorderPane {
         filtroDesde.setPromptText("Sin límite inicial");
         filtroHasta.setPromptText("Sin límite final");
 
+        /*
+         * Seleccionamos los límites temporales mediante los calendarios de los
+         * campos y deshabilitamos la escritura directa de sus fechas.
+         */
         filtroDesde.setEditable(false);
         filtroHasta.setEditable(false);
 
