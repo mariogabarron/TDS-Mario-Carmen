@@ -43,6 +43,17 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.StackPane;
 
+import es.um.tds.gastos.modelo.FiltroGastos;
+
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.MenuButton;
+
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class VistaGastos extends BorderPane {
 
     private final GestionGastos gestion;
@@ -78,9 +89,29 @@ public class VistaGastos extends BorderPane {
         new Label("Añade gastos para ver su distribución.");
 
     private final NumberFormat formatoMoneda =
-        NumberFormat.getCurrencyInstance(
+    	NumberFormat.getCurrencyInstance(
             Locale.forLanguageTag("es-ES")
         );
+    private final MenuButton menuMeses =
+    	new MenuButton("Meses");
+
+    private final MenuButton menuCategoriasFiltro =
+    	new MenuButton("Categorías");
+
+    private final Map<Month, CheckMenuItem> opcionesMeses =
+    	new LinkedHashMap<>();
+
+    private final Map<Categoria, CheckMenuItem> opcionesCategorias =
+    	new LinkedHashMap<>();
+
+    private final DatePicker filtroDesde = new DatePicker();
+    private final DatePicker filtroHasta = new DatePicker();
+
+    private final Label estadoFiltros =
+    	new Label("Sin filtros");
+
+    private FiltroGastos filtroActivo =
+    	FiltroGastos.sinRestricciones();
 
     public VistaGastos(GestionGastos gestion) {
         this.gestion = gestion;
@@ -97,6 +128,7 @@ public class VistaGastos extends BorderPane {
         );
 
         VBox cabecera = new VBox(8, titulo, etiquetaTotal);
+        cabecera.getChildren().add(crearPanelFiltros());
         cabecera.setPadding(new Insets(0, 0, 15, 0));
 
         setTop(cabecera);
@@ -186,7 +218,7 @@ public class VistaGastos extends BorderPane {
 
         campoCategoria.setMaxWidth(Double.MAX_VALUE);
 
-        // Por ahora la fecha se elige desde el calendario.
+        // TODO: Por ahora la fecha se elige desde el calendario.
         campoFecha.setEditable(false);
 
         Button botonCategoria = new Button("Nueva categoría");
@@ -271,7 +303,7 @@ public class VistaGastos extends BorderPane {
 
         } catch (NumberFormatException e) {
             mostrarError(
-                "Introduce un importe válido, por ejemplo 12,50."
+                "Introduce un importe válido, por ejemplo 23,50."
             );
         } catch (IllegalArgumentException e) {
             mostrarError(e.getMessage());
@@ -359,17 +391,28 @@ public class VistaGastos extends BorderPane {
     }
 
     private void actualizarTabla() {
-        List<Gasto> gastos = gestion.getGastos();
+        List<Gasto> gastos =
+            gestion.filtrarGastos(filtroActivo);
 
         BigDecimal total = gastos.stream()
             .map(Gasto::getImporte)
-            .reduce(new BigDecimal("0.00"), BigDecimal::add);
+            .reduce(
+                new BigDecimal("0.00"),
+                BigDecimal::add
+            );
 
         tabla.getItems().setAll(gastos);
         tabla.refresh();
 
+        tabla.setPlaceholder(
+            new Label("No hay gastos que coincidan con la consulta.")
+        );
+
         etiquetaTotal.setText(
-            "Total registrado: " + formatoMoneda.format(total)
+            "Total mostrado: "
+                + formatoMoneda.format(total)
+                + " | Gastos mostrados: "
+                + gastos.size()
         );
 
         actualizarGraficos(gastos);
@@ -520,4 +563,142 @@ public class VistaGastos extends BorderPane {
 
         graficoBarras.getData().add(serie);
     }
+    
+    private void actualizarCategoriasFiltro() {
+        for (Categoria categoria : gestion.getCategorias()) {
+            if (!opcionesCategorias.containsKey(categoria)) {
+                CheckMenuItem opcion = new CheckMenuItem(
+                    categoria.getNombre()
+                );
+
+                opcionesCategorias.put(categoria, opcion);
+                menuCategoriasFiltro.getItems().add(opcion);
+            }
+        }
+    }
+    
+    private void aplicarFiltros() {
+        Set<Month> mesesSeleccionados =
+            opcionesMeses.entrySet().stream()
+                .filter(entrada -> entrada.getValue().isSelected())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        Set<Categoria> categoriasSeleccionadas =
+            opcionesCategorias.entrySet().stream()
+                .filter(entrada -> entrada.getValue().isSelected())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        try {
+            FiltroGastos nuevoFiltro = new FiltroGastos(
+                mesesSeleccionados,
+                categoriasSeleccionadas,
+                filtroDesde.getValue(),
+                filtroHasta.getValue()
+            );
+
+            filtroActivo = nuevoFiltro;
+
+            prepararNuevoGasto();
+            actualizarTabla();
+
+            estadoFiltros.setText(
+                "Filtro aplicado: "
+                    + mesesSeleccionados.size()
+                    + " meses y "
+                    + categoriasSeleccionadas.size()
+                    + " categorías seleccionados. "
+                    + "0 significa sin restricción. "
+                    + "Desde: "
+                    + (filtroDesde.getValue() == null
+                        ? "sin límite"
+                        : filtroDesde.getValue())
+                    + ". Hasta: "
+                    + (filtroHasta.getValue() == null
+                        ? "sin límite"
+                        : filtroHasta.getValue())
+            );
+
+        } catch (IllegalArgumentException e) {
+            mostrarError(e.getMessage());
+        }
+    }
+    
+    private void limpiarFiltros() {
+        opcionesMeses.values().forEach(
+            opcion -> opcion.setSelected(false)
+        );
+
+        opcionesCategorias.values().forEach(
+            opcion -> opcion.setSelected(false)
+        );
+
+        filtroDesde.setValue(null);
+        filtroHasta.setValue(null);
+
+        filtroActivo = FiltroGastos.sinRestricciones();
+
+        estadoFiltros.setText("Sin filtros");
+
+        prepararNuevoGasto();
+        actualizarTabla();
+    }
+    
+    private VBox crearPanelFiltros() {
+        for (Month mes : Month.values()) {
+            String nombre = mes.getDisplayName(
+                TextStyle.FULL,
+                Locale.forLanguageTag("es-ES")
+            );
+
+            CheckMenuItem opcion = new CheckMenuItem(nombre);
+
+            opcionesMeses.put(mes, opcion);
+            menuMeses.getItems().add(opcion);
+        }
+
+        actualizarCategoriasFiltro();
+
+        menuCategoriasFiltro.setOnShowing(
+            evento -> actualizarCategoriasFiltro()
+        );
+
+        filtroDesde.setPromptText("Sin límite inicial");
+        filtroHasta.setPromptText("Sin límite final");
+
+        filtroDesde.setEditable(false);
+        filtroHasta.setEditable(false);
+
+        Button aplicar = new Button("Aplicar filtros");
+        Button limpiar = new Button("Limpiar filtros");
+
+        aplicar.setOnAction(evento -> aplicarFiltros());
+        limpiar.setOnAction(evento -> limpiarFiltros());
+
+        HBox selecciones = new HBox(
+            10,
+            menuMeses,
+            menuCategoriasFiltro,
+            aplicar,
+            limpiar
+        );
+
+        HBox fechas = new HBox(
+            10,
+            new Label("Desde:"),
+            filtroDesde,
+            new Label("Hasta:"),
+            filtroHasta
+        );
+
+        return new VBox(
+            8,
+            new Label("Filtrar gastos"),
+            selecciones,
+            fechas,
+            estadoFiltros
+        );
+    }
+    
 }

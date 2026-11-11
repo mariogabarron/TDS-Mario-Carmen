@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import es.um.tds.gastos.modelo.Categoria;
 import es.um.tds.gastos.modelo.Gasto;
+import es.um.tds.gastos.modelo.FiltroGastos;
 
 public class GestionGastos {
 
@@ -110,6 +111,12 @@ public class GestionGastos {
                     BigDecimal::add
                 )
             ));
+    }
+    
+    public List<Gasto> filtrarGastos(FiltroGastos filtro) {
+        return getGastos().stream()
+            .filter(filtro::cumple)
+            .toList();
     }
     
 }
