@@ -159,11 +159,11 @@ Como usuario de la aplicación, quiero importar gastos desde un fichero de texto
 **Criterios de aceptación**
 
 - Dado un fichero bancario válido en un formato admitido, cuando lo importo, entonces sus gastos se incorporan a la aplicación y se pueden consultar en la lista.
-- Dados varios formatos admitidos, la importación interpreta los datos según el formato de cada fichero y los incorpora como gastos de la aplicación.
+- Dado el fichero de ejemplo de Aula Virtual, cuento sus registros de gasto (excluyendo cabeceras) y anoto ese número como N. Si antes hay M gastos, tras importarlo una vez deben figurar M + N. Compruebo que los importes y fechas de los apuntes incorporados coinciden con sus registros de origen y que los M anteriores se conservan.
 - Dados gastos importados, cuando reinicio la aplicación, entonces siguen disponibles para su consulta.
 
-El fichero bancario de ejemplo facilitado en Aula Virtual sirve para verificar la importación. La aplicación debe estar preparada para incorporar otros formatos de origen.
+Para repetir la prueba con otro formato admitido, se usan archivos de prueba equivalentes con los mismos movimientos y se comparan sus resultados partiendo del mismo estado inicial. La aplicación debe estar preparada para incorporar otros formatos de origen.
 
 ## Referencia para el diagrama de interacción
 
-La historia **HU-01 — Registrar un gasto personal** corresponde al flujo «Registrar un gasto personal» del diagrama de interacción.
+La historia **HU-01 — Registrar un gasto personal** corresponde al flujo «Registrar un gasto personal» del [diagrama de interacción](diagrama-interaccion-hu01.md).

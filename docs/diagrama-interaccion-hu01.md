@@ -11,8 +11,7 @@ sequenceDiagram
     actor U as Usuario
     participant V as Formulario JavaFX
     participant C as GestionGastos
-    participant G as gasto: Gasto
-    participant R as Repositorio de gastos (JDBC)
+    participant R as Repositorio de gastos
     U->>V: Introducir importe y fecha, elegir categoría y guardar
     V->>C: registrarGasto(importe, fecha, categoria)
     C->>C: comprobarCategoria(categoria)
@@ -20,8 +19,9 @@ sequenceDiagram
         C-->>V: Categoría inválida
         V-->>U: Indicar que debe elegir una categoría registrada
     else Categoría registrada
-        C->>G: «create» Gasto(importe, fecha, categoria)
-        G->>G: validar datos
+        create participant G as gasto de tipo Gasto
+        C->>G: Crear Gasto(importe, fecha, categoria)
+        G->>G: actualizarDatos(importe, fecha, categoria)
         alt Datos inválidos
             G-->>C: Error de validación
             C-->>V: Datos inválidos
@@ -45,3 +45,5 @@ sequenceDiagram
 **Postcondición de éxito.** El gasto queda almacenado con el importe, la fecha y la categoría indicados. Si el usuario cierra y vuelve a abrir la aplicación, puede consultarlo en la lista.
 
 **Comprobación de la HU-01.** Dada la categoría «Transporte», cuando el usuario guarda un gasto de 15 € del 24 de noviembre de 2026, entonces aparece un apunte con esos tres datos y sigue disponible tras reiniciar la aplicación.
+
+**Alcance.** El repositorio representa el contrato de persistencia. Su implementación JDBC solo devuelve éxito tras completar la escritura. La recuperación al reiniciar se comprueba mediante el segundo criterio de [HU-01](historias-de-usuario.md), en una ejecución posterior.

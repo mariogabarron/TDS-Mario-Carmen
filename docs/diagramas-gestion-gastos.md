@@ -1,4 +1,4 @@
-# Diagramas de Gestión de Gastos
+# Modelo de dominio · Gestión de Gastos
 
 ## Diagrama de clases del dominio
 
@@ -63,45 +63,17 @@ class Participante {
     porcentajePersonalizado
 }
 class GastoCompartido {
-    importe
+    BigDecimal importe
 }
 CuentaCompartida "1" *-- "1..*" Participante : incluye
 CuentaCompartida "1" *-- "0..*" GastoCompartido : registra
 GastoCompartido "0..*" --> "1" Participante : pagado por
+note for GastoCompartido "Restricción: el pagador pertenece a la cuenta del gasto"
+note for CuentaCompartida "Integrantes fijos desde el alta. En reparto personalizado los porcentajes suman 100 %."
 ```
 
 El rombo negro indica que los participantes y los gastos de este dibujo pertenecen a una cuenta concreta. Se usa `1..*` porque el enunciado no fija un mínimo explícito. `GastoCompartido` se modela por separado porque el enunciado le exige cuenta y pagador, y no le asigna expresamente una categoría.
 
-## Diagrama de interacción
+**Comprobación del modelo.** Si Raquel adelanta 30 € en una cuenta de tres personas con reparto equitativo, cada una asume 10 €. Los saldos son +20 €, −10 € y −10 €. Su suma es cero: todo importe pendiente de cobro tiene su contrapartida en el grupo.
 
-### Registrar un gasto personal
-
-> Como usuario, quiero registrar un gasto con su importe, fecha y categoría para llevar un control de mis gastos.
-
-La secuencia muestra la lógica de registro que ya se puede ejecutar desde la clase de prueba en Eclipse. La categoría se obtiene previamente de la gestión. El constructor de `Gasto` valida los datos mediante `actualizarDatos`. Si las validaciones pasan, la gestión añade el gasto a su lista en memoria y lo devuelve.
-
-```mermaid
-sequenceDiagram
-    participant P as PruebaGestionGastos
-    participant S as GestionGastos
-    P->>S: registrarGasto(importe, fecha, categoria)
-    S->>S: comprobarCategoria(categoria)
-    alt Categoría registrada
-        create participant G as Gasto
-        S->>G: Constructor con importe, fecha y categoría
-        G->>G: actualizarDatos(importe, fecha, categoria)
-        alt Datos válidos
-            G-->>S: gasto creado
-            S->>S: gastos.add(gasto)
-            S-->>P: gasto registrado
-        else Datos inválidos
-            G-->>S: IllegalArgumentException
-            S-->>P: IllegalArgumentException
-        end
-    else Categoría sin registrar
-        S-->>P: IllegalArgumentException
-    end
-```
-
-La secuencia se puede ampliar con el controlador JavaFX y el repositorio cuando se compruebe cómo se conectan al registro.
-
+El comportamiento de registro se especifica en el [diagrama de secuencia de la HU-01](diagrama-interaccion-hu01.md).
