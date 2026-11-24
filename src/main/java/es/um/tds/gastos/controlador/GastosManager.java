@@ -42,6 +42,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 
+import es.um.tds.gastos.Configuracion;
+
 /*
  * Hemos separado el comportamiento de la pantalla de su estructura visual.
  * Recibimos desde el FXML los controles y atendemos sus eventos, mientras
@@ -49,7 +51,7 @@ import javafx.scene.control.TextInputDialog;
  */
 public class GastosManager {
 
-    private final GestionGastos gestion;
+    private GestionGastos gestion;
 
     /*
      * Referenciamos los controles creados por FXMLLoader mediante sus fx:id.
@@ -91,19 +93,12 @@ public class GastosManager {
     private FiltroGastos filtroActivo = FiltroGastos.sinRestricciones();
 
     /*
-     * Recibimos el mismo servicio que conserva ViewController. En el constructor
-     * no accedemos a los controles porque todavía no se ha cargado el FXML.
-     */
-    public GastosManager(GestionGastos gestion) {
-        this.gestion = Objects.requireNonNull(gestion);
-    }
-
-    /*
      * Inicializamos el comportamiento cuando FXMLLoader ya ha inyectado los
      * controles. Las dimensiones, los textos y la distribución están en el FXML.
      */
     @FXML
     private void initialize() {
+        gestion = Configuracion.getInstancia().getGestionGastos();
         configurarTabla();
         configurarComportamiento();
         configurarFiltros();
