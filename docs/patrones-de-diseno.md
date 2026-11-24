@@ -27,5 +27,3 @@ En el [registro de un gasto personal](diagrama-interaccion-hu01.md), la capa de 
 ## Singleton · Acceso a una instancia compartida
 
 El enunciado exige Singleton cuando una clase necesita una única instancia de acceso global. Para ese papel proponemos el servicio de aplicación `GestionGastos`, que coordina el registro desde las distintas entradas. El diseño prevé restringir su construcción y ofrecer un punto de acceso que devuelva siempre la misma instancia dentro de una ejecución. Puede comprobarse solicitándola dos veces y verificando que ambas referencias identifican el mismo objeto.
-
-El alcance de esta decisión importa en nuestra aplicación. Si la interfaz gráfica y la terminal arrancan en procesos distintos, cada proceso tiene su propia instancia de gestión. Lo que permite recuperar los gastos desde ambas ejecuciones es el repositorio persistente.
