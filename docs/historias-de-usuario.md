@@ -80,8 +80,6 @@ Como usuario de la aplicación, quiero ver un gráfico de los gastos por categor
 - Dados dos gastos de alimentación de 25 € y 15 € y un gasto de transporte de 10 €, cuando consulto el gráfico de barras o circular, entonces los valores representados corresponden a 40 € en alimentación y 10 € en transporte.
 - Dados esos mismos gastos, cuando filtro por «Transporte», entonces el gráfico representa únicamente los 10 € de transporte.
 
-El enunciado también propone valorar una vista de calendario como posible visualización avanzada.
-
 ## Alertas y notificaciones
 
 ### HU-09 — Configurar un límite de gasto
