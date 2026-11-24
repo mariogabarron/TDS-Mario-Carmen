@@ -1,6 +1,6 @@
 # Patrones de diseño · Gestión de Gastos
 
-El enunciado fija los patrones que debemos aplicar. En este apartado explicamos cómo encajan en el diseño de Gestión de Gastos, qué responsabilidad asignamos a cada participante y cómo se puede comprobar el resultado.
+En este apartado explicamos cómo encajan en el diseño de Gestión de Gastos, qué responsabilidad asignamos a cada participante y cómo se puede comprobar el resultado.
 
 ## Estrategia · Evaluación de alertas
 
@@ -22,14 +22,10 @@ Los dos patrones colaboran en momentos distintos del mismo recorrido. El Método
 
 ## Repositorio · Persistencia mediante JDBC
 
-En el [registro de un gasto personal](diagrama-interaccion-hu01.md), la capa de aplicación valida la categoría y solicita al repositorio que guarde el gasto. El repositorio ofrece operaciones expresadas en términos del dominio, como guardar o recuperar gastos. Su implementación JDBC se ocupa de ejecutar las consultas y reconstruir los objetos a partir de las filas recuperadas.
-
-Esta separación permite que el formulario y la terminal utilicen la misma operación de registro. Si la escritura falla, la capa de aplicación recibe el fallo y la interfaz puede comunicárselo al usuario. El criterio observable es que un alta confirmada pueda consultarse después de cerrar y volver a abrir el programa.
+En el [registro de un gasto personal](diagrama-interaccion-hu01.md), la capa de aplicación valida la categoría y solicita al repositorio que guarde el gasto. El repositorio ofrece operaciones expresadas en términos del dominio, como guardar o recuperar gastos. Su implementación JDBC se ocupa de ejecutar las consultas y reconstruir los objetos a partir de las filas recuperadas. Esta separación permite que el formulario y la terminal utilicen la misma operación de registro. Si la escritura falla, la capa de aplicación recibe el fallo y la interfaz puede comunicárselo al usuario. El criterio observable es que un alta confirmada pueda consultarse después de cerrar y volver a abrir el programa.
 
 ## Singleton · Acceso a una instancia compartida
 
 El enunciado exige Singleton cuando una clase necesita una única instancia de acceso global. Para ese papel proponemos el servicio de aplicación `GestionGastos`, que coordina el registro desde las distintas entradas. El diseño prevé restringir su construcción y ofrecer un punto de acceso que devuelva siempre la misma instancia dentro de una ejecución. Puede comprobarse solicitándola dos veces y verificando que ambas referencias identifican el mismo objeto.
 
 El alcance de esta decisión importa en nuestra aplicación. Si la interfaz gráfica y la terminal arrancan en procesos distintos, cada proceso tiene su propia instancia de gestión. Lo que permite recuperar los gastos desde ambas ejecuciones es el repositorio persistente.
-
-**Correspondencia con la implementación.** El documento recoge el diseño previsto. Para la entrega final se deben contrastar los participantes con las clases Java efectivamente utilizadas, especialmente el creador concreto del adaptador y la clase que proporciona el acceso Singleton.
