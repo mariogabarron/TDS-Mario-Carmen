@@ -77,11 +77,14 @@ public class GestionGastos {
     }
 
     public BigDecimal calcularTotal() {
+        return calcularTotal(getGastos());
+    }
+
+    public BigDecimal calcularTotal(List<Gasto> gastos) {
         return gastos.stream()
             .map(Gasto::getImporte)
             .reduce(new BigDecimal("0.00"), BigDecimal::add);
     }
-
     private void comprobarCategoria(Categoria categoria) {
         if (categoria == null || !categorias.contains(categoria)) {
             throw new IllegalArgumentException(
