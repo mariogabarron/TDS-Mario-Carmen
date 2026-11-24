@@ -11,7 +11,7 @@ Gestión de Gastos es una aplicación de escritorio que permite trabajar desde u
 | Dominio | `Gasto` reúne el importe, la fecha y la categoría, y valida sus propios datos. `FiltroGastos` determina si un gasto cumple los criterios de una consulta. |
 | Persistencia | El repositorio se encarga de guardar y recuperar los datos mediante JDBC. Así, el código que registra el gasto puede pedir que se guarde sin conocer las tablas ni escribir SQL. |
 
-El flujo documentado inicialmente guarda los gastos en memoria. El [diagrama de interacción de la HU-01](diagrama-interaccion-hu01.md) recoge el diseño previsto con persistencia: la interfaz muestra el alta como completada cuando el repositorio confirma la escritura. Si falla el guardado, el usuario puede saber que ese apunte sigue pendiente.
+El flujo documentado inicialmente guarda los gastos en memoria. El [diagrama de interacción de la HU-01](diagrama-interaccion-hu01.md) recoge el diseño con persistencia: la interfaz muestra el alta como completada cuando el repositorio confirma la escritura. Si falla el guardado, el usuario puede saber que ese apunte sigue pendiente.
 
 ## Decisiones de diseño
 
@@ -25,4 +25,4 @@ El flujo documentado inicialmente guarda los gastos en memoria. El [diagrama de 
 
 **Distinguir una alerta del aviso que genera.** En el modelo, una alerta describe una regla, como superar 100 € al mes en videojuegos. Una notificación recoge una ocasión concreta en que se superó el límite. Esta distinción permite consultar en el historial qué ocurrió en un mes anterior aunque el usuario haya cambiado después su presupuesto.
 
-El [modelo de dominio](diagramas-gestion-gastos.md) recoge las multiplicidades y restricciones que aplican estas decisiones. Los nombres de las clases de persistencia y su conexión definitiva deberán contrastarse con la versión entregada del código.
+El [modelo de dominio](diagramas-gestion-gastos.md) recoge las multiplicidades y restricciones que aplican estas decisiones. 
