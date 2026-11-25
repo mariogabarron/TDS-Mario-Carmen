@@ -9,6 +9,7 @@ import es.um.tds.gastos.modelo.Notificacion;
 import es.um.tds.gastos.modelo.PeriodoAlerta;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import es.um.tds.gastos.modelo.Categoria;
@@ -31,10 +32,10 @@ public class GestionGastos {
 	
 	public GestionGastos(RepositorioGastos gastos, RepositorioCategorias categorias, 
 			RepositorioAlertas alertas, GestorTransacciones transacciones) {
-	    this.gastos = gastos;
-	    this.categorias = categorias;
-	    this.alertas = alertas;
-	    this.transacciones = transacciones;
+		this.gastos = Objects.requireNonNull(gastos);
+	    this.categorias = Objects.requireNonNull(categorias);
+	    this.alertas = Objects.requireNonNull(alertas);
+	    this.transacciones = Objects.requireNonNull(transacciones);
 	}
 	
 
@@ -46,7 +47,7 @@ public class GestionGastos {
 	    if (categoria != null) {
 	        comprobarCategoria(categoria);
 	    }
-	    repositorioAlertas().agregar(
+	    alertas.agregar(
 	        new Alerta(
 	            UUID.randomUUID(),
 	            limite,
@@ -56,18 +57,11 @@ public class GestionGastos {
 	    );
 	}
     public List<Alerta> getAlertas() {
-        return repositorioAlertas().listar();
+        return alertas.listar();
     }
 
     public List<Notificacion> getHistorial() {
-        return repositorioAlertas().historial();
-    }
-
-    private RepositorioAlertas repositorioAlertas() {
-        if (alertas == null) {
-            throw new IllegalStateException("Esta configuración requiere un repositorio de alertas.");
-        }
-        return alertas;
+        return alertas.historial();
     }
 
 	public void importarGastos(List<Gasto> importados) {
@@ -131,12 +125,10 @@ public class GestionGastos {
 	    );
 	
 	    transacciones.ejecutar(() -> {
-	        Gasto anterior = gastos.listar().stream()
-	            .filter(g -> g.getId().equals(gasto.getId()))
-	            .findFirst()
-	            .orElseThrow(() -> new IllegalArgumentException(
-	                "El gasto no está registrado."
-	            ));
+	    	Gasto anterior = gastos.buscarPorId(gasto.getId())
+	    		    .orElseThrow(() -> new IllegalArgumentException(
+	    		        "El gasto no está registrado."
+	    		    ));
 	
 	        gastos.modificar(actualizado);
 	        evaluarAlertas(actualizado, anterior);

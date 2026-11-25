@@ -1,6 +1,6 @@
-
 package es.um.tds.gastos.persistencia;
 
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -69,7 +69,6 @@ public final class AlmacenMemoria implements GestorTransacciones {
 
             @Override
             public void agregar(Gasto gasto) {
-
                 if (gastos.containsKey(gasto.getId())) {
                     throw new IllegalStateException(
                         "El gasto ya está registrado."
@@ -81,7 +80,6 @@ public final class AlmacenMemoria implements GestorTransacciones {
 
             @Override
             public void modificar(Gasto gasto) {
-
                 if (!gastos.containsKey(gasto.getId())) {
                     throw new IllegalArgumentException(
                         "El gasto no está registrado."
@@ -93,12 +91,17 @@ public final class AlmacenMemoria implements GestorTransacciones {
 
             @Override
             public void eliminar(Gasto gasto) {
-
                 if (gastos.remove(gasto.getId()) == null) {
                     throw new IllegalArgumentException(
                         "El gasto no está registrado."
                     );
                 }
+            }
+            
+            @Override
+            public Optional<Gasto> buscarPorId(UUID id) {
+                return Optional.ofNullable(gastos.get(id))
+                    .map(AlmacenMemoria.this::copiar);
             }
         };
     }

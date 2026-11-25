@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import es.um.tds.gastos.modelo.Categoria;
 import es.um.tds.gastos.modelo.Gasto;
+import java.util.Optional;
 
 public final class GastosSQLite implements RepositorioGastos {
     private final BaseDatos base;
@@ -101,4 +102,37 @@ public final class GastosSQLite implements RepositorioGastos {
             throw new IllegalArgumentException("El gasto no está registrado.");
         }
     }
+
+	@Override
+	public Optional<Gasto> buscarPorId(UUID id) {
+	    return base.conConexion(con -> {
+	        String sql = """
+	            SELECT g.id, g.importe, g.fecha,
+	                   c.id AS categoria_id, c.nombre
+	            FROM gastos g
+	            JOIN categorias c ON c.id = g.categoria_id
+	            WHERE g.id = ?
+	            """;
+	
+	        try (var orden = con.prepareStatement(sql)) {
+	            orden.setString(1, id.toString());
+	            try (var filas = orden.executeQuery()) {
+	                if (!filas.next()) {
+	                    return Optional.empty();
+	                }
+	                Categoria categoria = new Categoria(
+	                    UUID.fromString(filas.getString("categoria_id")),
+	                    filas.getString("nombre")
+	                );
+	                return Optional.of(new Gasto(
+	                    UUID.fromString(filas.getString("id")),
+	                    new BigDecimal(filas.getString("importe")),
+	                    LocalDate.parse(filas.getString("fecha")),
+	                    categoria
+	                ));
+	            }
+	        }
+	    });
+	}
+
 }
