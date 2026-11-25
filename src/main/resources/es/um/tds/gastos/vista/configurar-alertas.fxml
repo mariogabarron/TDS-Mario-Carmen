@@ -1,0 +1,62 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+
+<DialogPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="es.um.tds.gastos.controlador.ConfigurarAlertasController"
+            prefWidth="420">
+
+    <content>
+        <VBox spacing="8">
+
+            <padding>
+                <Insets top="15" right="15"
+                        bottom="15" left="15"/>
+            </padding>
+
+            <Label text="Límite (€)"/>
+
+            <TextField fx:id="limite"
+                       promptText="Ejemplo: 100,00"/>
+
+            <Label text="Periodicidad"/>
+
+            <ComboBox fx:id="periodo"
+                      maxWidth="Infinity"/>
+
+            <CheckBox fx:id="todas"
+                      text="Todas las categorías"
+                      selected="true"/>
+
+            <ComboBox fx:id="categoria"
+                      maxWidth="Infinity"/>
+
+            <Button text="Crear alerta"
+                    onAction="#crearAlerta"/>
+
+            <Label fx:id="mensaje"
+                   wrapText="true"/>
+
+            <Separator/>
+
+            <Label text="Alertas configuradas"/>
+
+            <ListView fx:id="lista"
+                      prefHeight="130">
+                <placeholder>
+                    <Label text="Todavía no hay alertas configuradas."/>
+                </placeholder>
+            </ListView>
+
+        </VBox>
+    </content>
+
+    <buttonTypes>
+        <ButtonType fx:constant="CLOSE"/>
+    </buttonTypes>
+
+</DialogPane>

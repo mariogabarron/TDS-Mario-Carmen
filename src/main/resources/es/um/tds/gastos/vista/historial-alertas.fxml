@@ -1,0 +1,27 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+
+<DialogPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="es.um.tds.gastos.controlador.HistorialAlertasController"
+            prefWidth="800">
+
+    <content>
+        <ListView fx:id="lista"
+                  prefWidth="780"
+                  prefHeight="300">
+
+            <placeholder>
+                <Label text="Todavía no se ha superado ningún límite."/>
+            </placeholder>
+
+        </ListView>
+    </content>
+
+    <buttonTypes>
+        <ButtonType fx:constant="CLOSE"/>
+    </buttonTypes>
+
+</DialogPane>

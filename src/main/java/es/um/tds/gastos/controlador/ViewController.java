@@ -7,6 +7,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Alert;
 
 public class ViewController {
 
@@ -41,4 +44,57 @@ public class ViewController {
         stage.setMinHeight(700);
         stage.show();
     }
+    
+
+	public void mostrarConfiguracionAlertas() {
+	    mostrarDialogo(
+	        "configurar-alertas.fxml",
+	        "Alertas de gasto"
+	    );
+	}
+	
+	public void mostrarHistorialAlertas() {
+	    mostrarDialogo(
+	        "historial-alertas.fxml",
+	        "Historial de notificaciones"
+	    );
+	}
+	
+	private void mostrarDialogo(String fichero, String titulo) {
+	
+	    String ruta = "/es/um/tds/gastos/vista/" + fichero;
+	
+	    try {
+	
+	        URL recurso = ViewController.class.getResource(ruta);
+	
+	        if (recurso == null) {
+	            throw new IOException(
+	                "No se ha encontrado el recurso FXML: " + ruta
+	            );
+	        }
+	
+	        FXMLLoader loader = new FXMLLoader(recurso);
+	        DialogPane contenido = loader.load();
+	
+	        Dialog<Void> dialogo = new Dialog<>();
+	
+	        dialogo.initOwner(stage);
+	        dialogo.setTitle(titulo);
+	        dialogo.setDialogPane(contenido);
+	
+	        dialogo.showAndWait();
+	
+	    } catch (IOException e) {
+	
+	        Alert aviso = new Alert(Alert.AlertType.ERROR);
+	
+	        aviso.setTitle("Error");
+	        aviso.setHeaderText("No se pudo abrir la ventana");
+	        aviso.setContentText(e.getMessage());
+	
+	        aviso.showAndWait();
+	    }
+	}
+
 }
