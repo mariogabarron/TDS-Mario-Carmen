@@ -1,24 +1,35 @@
 package es.um.tds.gastos;
 
-import es.um.tds.gastos.aplicacion.GestionGastos;
-import es.um.tds.gastos.controlador.SceneManager;
+import java.util.Objects;
+
+import es.um.tds.gastos.controlador.GestionGastos;
+import es.um.tds.gastos.vista.SceneManager;
 
 public abstract class Configuracion {
 
     private static Configuracion instancia;
-    private final SceneManager viewController = new SceneManager();
 
     static void setInstancia(Configuracion impl) {
-        Configuracion.instancia = impl;
+        if (instancia != null) {
+            throw new IllegalStateException(
+                "La configuración ya está inicializada."
+            );
+        }
+        instancia = Objects.requireNonNull(impl);
     }
 
     public static Configuracion getInstancia() {
-        return Configuracion.instancia;
+        if (instancia == null) {
+            throw new IllegalStateException(
+                "La configuración no está inicializada."
+            );
+        }
+        return instancia;
     }
 
     public abstract GestionGastos getGestionGastos();
 
     public SceneManager getViewController() {
-        return viewController;
+        return SceneManager.getInstancia();
     }
 }

@@ -2,7 +2,7 @@ package es.um.tds.gastos;
 
 import java.nio.file.Path;
 
-import es.um.tds.gastos.aplicacion.GestionGastos;
+import es.um.tds.gastos.controlador.GestionGastos;
 import es.um.tds.gastos.persistencia.*;
 
 public class ConfiguracionSQLite extends Configuracion {

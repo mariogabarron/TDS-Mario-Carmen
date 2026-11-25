@@ -6,7 +6,7 @@
 
 <DialogPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="es.um.tds.gastos.controlador.ConfigurarAlertasController"
+            fx:controller="es.um.tds.gastos.vista.ConfigurarAlertasController"
             prefWidth="420">
 
     <content>

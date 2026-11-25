@@ -1,5 +1,5 @@
 
-package es.um.tds.gastos.controlador;
+package es.um.tds.gastos.vista;
 
 import java.math.BigDecimal;
 
@@ -7,7 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import es.um.tds.gastos.Configuracion;
-import es.um.tds.gastos.aplicacion.GestionGastos;
+import es.um.tds.gastos.controlador.GestionGastos;
 import es.um.tds.gastos.modelo.Alerta;
 import es.um.tds.gastos.modelo.Categoria;
 import es.um.tds.gastos.modelo.PeriodoAlerta;

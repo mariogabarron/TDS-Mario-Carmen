@@ -1,4 +1,4 @@
-package es.um.tds.gastos.controlador;
+package es.um.tds.gastos.vista;
 
 import java.io.IOException;
 import java.net.URL;
@@ -14,6 +14,15 @@ import javafx.scene.control.Alert;
 public class SceneManager {
 
     private Stage stage;
+    
+    private static final SceneManager instancia = new SceneManager();
+
+    private SceneManager() {
+    }
+
+    public static SceneManager getInstancia() {
+        return instancia;
+    }
 
     public void inicializar(Stage stage) {
         this.stage = stage;

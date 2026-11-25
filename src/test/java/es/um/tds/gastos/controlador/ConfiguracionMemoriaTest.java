@@ -1,5 +1,5 @@
 
-package es.um.tds.gastos.aplicacion;
+package es.um.tds.gastos.controlador;
 
 import static org.junit.jupiter.api.Assertions.*;
 

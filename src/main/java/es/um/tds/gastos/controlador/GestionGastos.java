@@ -1,4 +1,4 @@
-package es.um.tds.gastos.aplicacion;
+package es.um.tds.gastos.controlador;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -1,6 +1,6 @@
 package es.um.tds.gastos;
 
-import es.um.tds.gastos.aplicacion.GestionGastos;
+import es.um.tds.gastos.controlador.GestionGastos;
 import es.um.tds.gastos.persistencia.AlmacenMemoria;
 
 public class ConfiguracionMemoria extends Configuracion {

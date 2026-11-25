@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import es.um.tds.gastos.aplicacion.GestionGastos;
 import es.um.tds.gastos.modelo.Categoria;
 import es.um.tds.gastos.modelo.Gasto;
 import es.um.tds.gastos.ConfiguracionSQLite;
+import es.um.tds.gastos.controlador.GestionGastos;
 
 public class ConsolaGastos {
 

@@ -1,4 +1,4 @@
-package es.um.tds.gastos.controlador;
+package es.um.tds.gastos.vista;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -7,14 +7,10 @@ import java.util.List;
 import java.util.Locale;
 
 import es.um.tds.gastos.Configuracion;
-import es.um.tds.gastos.aplicacion.GestionGastos;
+import es.um.tds.gastos.controlador.GestionGastos;
 import es.um.tds.gastos.modelo.Categoria;
 import es.um.tds.gastos.modelo.FiltroGastos;
 import es.um.tds.gastos.modelo.Gasto;
-import es.um.tds.gastos.vista.TablaGastos;
-import es.um.tds.gastos.vista.GraficosGastos;
-import es.um.tds.gastos.vista.FiltrosGastosView;
-
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;

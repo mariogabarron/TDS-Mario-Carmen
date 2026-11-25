@@ -1,4 +1,4 @@
-package es.um.tds.gastos.controlador;
+package es.um.tds.gastos.vista;
 
 import javafx.fxml.FXML;
 import es.um.tds.gastos.Configuracion;

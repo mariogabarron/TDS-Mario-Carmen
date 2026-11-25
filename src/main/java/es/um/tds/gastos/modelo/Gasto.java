@@ -7,14 +7,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 
-public class Gasto {
+public final class Gasto {
+	
     private final UUID id;
-
-    public UUID getId() {
-        return id;
-    }
-
-
     private BigDecimal importe;
     private LocalDate fecha;
     private Categoria categoria;
@@ -66,6 +61,10 @@ public class Gasto {
         this.importe = importeValidado;
         this.fecha = fecha;
         this.categoria = categoria;
+    }
+    
+    public UUID getId() {
+        return id;
     }
 
     public BigDecimal getImporte() {
