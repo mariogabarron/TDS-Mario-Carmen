@@ -1,12 +1,12 @@
 package es.um.tds.gastos;
 
 import es.um.tds.gastos.aplicacion.GestionGastos;
-import es.um.tds.gastos.controlador.ViewController;
+import es.um.tds.gastos.controlador.SceneManager;
 
 public abstract class Configuracion {
 
     private static Configuracion instancia;
-    private final ViewController viewController = new ViewController();
+    private final SceneManager viewController = new SceneManager();
 
     static void setInstancia(Configuracion impl) {
         Configuracion.instancia = impl;
@@ -18,7 +18,7 @@ public abstract class Configuracion {
 
     public abstract GestionGastos getGestionGastos();
 
-    public ViewController getViewController() {
+    public SceneManager getViewController() {
         return viewController;
     }
 }

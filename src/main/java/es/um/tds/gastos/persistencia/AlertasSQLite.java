@@ -23,7 +23,7 @@ public final class AlertasSQLite implements RepositorioAlertas {
                 "INSERT INTO alertas(id, limite, periodo, categoria_id) VALUES (?, ?, ?, ?)")) {
             orden.setString(1, alerta.id().toString());
             orden.setString(2, alerta.limite().toPlainString());
-            orden.setString(3, alerta.periodo().name());
+            orden.setString(3, alerta.periodo().codigo());
             if (alerta.categoria() == null) {
                 orden.setNull(4, Types.VARCHAR);
             } else {
@@ -50,7 +50,7 @@ public final class AlertasSQLite implements RepositorioAlertas {
                 String id = filas.getString("categoria_id");
                 Categoria categoria = id == null ? null : new Categoria(UUID.fromString(id), filas.getString("nombre"));
                 alertas.add(new Alerta(UUID.fromString(filas.getString("id")), new BigDecimal(filas.getString("limite")),
-                    PeriodoAlerta.valueOf(filas.getString("periodo")), categoria));
+                		PeriodoAlerta.valueOf(filas.getString("periodo")).estrategia(), categoria));
             }
         }
         return List.copyOf(alertas);

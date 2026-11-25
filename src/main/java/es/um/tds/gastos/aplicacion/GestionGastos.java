@@ -52,13 +52,23 @@ public class GestionGastos {
 	}
 	
 
-    public void crearAlerta(BigDecimal limite, PeriodoAlerta periodo, Categoria categoria) {
-        if (categoria != null) {
-            comprobarCategoria(categoria);
-        }
-        repositorioAlertas().agregar(new Alerta(UUID.randomUUID(), limite, periodo, categoria));
-    }
+	public void crearAlerta(
+	        BigDecimal limite,
+	        PeriodoAlerta periodo,
+	        Categoria categoria) {
 
+	    if (categoria != null) {
+	        comprobarCategoria(categoria);
+	    }
+	    repositorioAlertas().agregar(
+	        new Alerta(
+	            UUID.randomUUID(),
+	            limite,
+	            periodo.estrategia(),
+	            categoria
+	        )
+	    );
+	}
     public List<Alerta> getAlertas() {
         return repositorioAlertas().listar();
     }

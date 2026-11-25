@@ -20,7 +20,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 
-public class GastosManager {
+public class GastosViewController {
 
     private GestionGastos gestion;
     private GraficosGastos graficos;

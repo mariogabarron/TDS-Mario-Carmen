@@ -11,7 +11,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Alert;
 
-public class ViewController {
+public class SceneManager {
 
     private Stage stage;
 
@@ -22,7 +22,7 @@ public class ViewController {
     public void mostrarGastos() throws IOException {
 
         String ruta = "/es/um/tds/gastos/vista/vista-gastos.fxml";
-        URL recurso = ViewController.class.getResource(ruta);
+        URL recurso = SceneManager.class.getResource(ruta);
 
         if (recurso == null) {
             throw new IOException(
@@ -66,7 +66,7 @@ public class ViewController {
 	
 	    try {
 	
-	        URL recurso = ViewController.class.getResource(ruta);
+	        URL recurso = SceneManager.class.getResource(ruta);
 	
 	        if (recurso == null) {
 	            throw new IOException(
