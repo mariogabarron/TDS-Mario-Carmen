@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+    <Appenders>
+
+        <RollingFile name="Fichero"
+                     fileName="${sys:user.home}/gestion-gastos.log"
+                     filePattern="${sys:user.home}/gestion-gastos-%i.log.gz">
+
+            <PatternLayout
+                pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %c{1} - %msg%n"/>
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1 MB"/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="3"/>
+
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Fichero"/>
+        </Root>
+    </Loggers>
+
+</Configuration>

@@ -16,6 +16,10 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import es.um.tds.gastos.persistencia.ErrorPersistenciaException;
+
 public class GastosViewController {
 
     private GestionGastos gestion;
@@ -32,6 +36,8 @@ public class GastosViewController {
             Locale.forLanguageTag("es-ES")
         );
 
+    private static final Logger logger = LogManager.getLogger(GastosViewController.class);
+    
     @FXML private TableView<Gasto> tabla;
     @FXML private TableColumn<Gasto, LocalDate> columnaFecha;
     @FXML private TableColumn<Gasto, String> columnaCategoria;
@@ -149,7 +155,11 @@ public class GastosViewController {
                 "Introduce un importe válido, por ejemplo 23,50."
             );
 
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
+            mostrarError(e.getMessage());
+
+        } catch (ErrorPersistenciaException e) {
+            logger.error("Error de persistencia al gestionar gastos", e);
             mostrarError(e.getMessage());
         }
     }
@@ -220,7 +230,11 @@ public class GastosViewController {
                 prepararNuevoGasto();
                 actualizarTabla();
 
-            } catch (IllegalArgumentException | IllegalStateException e) {
+            } catch (IllegalArgumentException e) {
+                mostrarError(e.getMessage());
+
+            } catch (ErrorPersistenciaException e) {
+                logger.error("Error de persistencia al gestionar gastos", e);
                 mostrarError(e.getMessage());
             }
         }
@@ -243,7 +257,11 @@ public class GastosViewController {
                 actualizarCategorias();
                 campoCategoria.setValue(nueva);
 
-            } catch (IllegalArgumentException | IllegalStateException e) {
+            } catch (IllegalArgumentException e) {
+                mostrarError(e.getMessage());
+
+            } catch (ErrorPersistenciaException e) {
+                logger.error("Error de persistencia al gestionar gastos", e);
                 mostrarError(e.getMessage());
             }
         });
@@ -266,19 +284,28 @@ public class GastosViewController {
             prepararNuevoGasto();
             actualizarTabla();
 
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
+            mostrarError(e.getMessage());
+
+        } catch (ErrorPersistenciaException e) {
+            logger.error("Error de persistencia al gestionar gastos", e);
             mostrarError(e.getMessage());
         }
     }
 
     @FXML
     private void limpiarFiltros() {
+        try {
+            filtros.limpiar();
+            filtroActivo = FiltroGastos.sinRestricciones();
 
-        filtros.limpiar();
-        filtroActivo = FiltroGastos.sinRestricciones();
+            prepararNuevoGasto();
+            actualizarTabla();
 
-        prepararNuevoGasto();
-        actualizarTabla();
+        } catch (ErrorPersistenciaException e) {
+            logger.error("Error al limpiar los filtros", e);
+            mostrarError(e.getMessage());
+        }
     }
 
     private void actualizarTabla() {

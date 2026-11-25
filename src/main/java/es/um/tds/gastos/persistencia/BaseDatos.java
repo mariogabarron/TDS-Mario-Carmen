@@ -116,7 +116,9 @@ public final class BaseDatos implements GestorTransacciones {
         }
     }
 
-    static IllegalStateException error(SQLException e) {
-        return new IllegalStateException("Error de acceso a SQLite: " + e.getMessage(), e);
+    static ErrorPersistenciaException error(SQLException e) {
+        return new ErrorPersistenciaException(
+            "No se pudo completar la operación en la base de datos.", e
+        );
     }
 }

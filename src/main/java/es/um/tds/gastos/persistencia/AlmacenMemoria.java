@@ -70,7 +70,7 @@ public final class AlmacenMemoria implements GestorTransacciones {
             @Override
             public void agregar(Gasto gasto) {
                 if (gastos.containsKey(gasto.getId())) {
-                    throw new IllegalStateException(
+                    throw new ErrorPersistenciaException(
                         "El gasto ya está registrado."
                     );
                 }
@@ -141,7 +141,7 @@ public final class AlmacenMemoria implements GestorTransacciones {
                 comprobarNombre(categoria);
 
                 if (categorias.containsKey(categoria.getId())) {
-                    throw new IllegalStateException(
+                    throw new ErrorPersistenciaException(
                         "La categoría ya está registrada."
                     );
                 }
@@ -196,7 +196,7 @@ public final class AlmacenMemoria implements GestorTransacciones {
                 }
 
                 if (alertas.containsKey(alerta.id())) {
-                    throw new IllegalStateException(
+                    throw new ErrorPersistenciaException(
                         "La alerta ya está registrada."
                     );
                 }

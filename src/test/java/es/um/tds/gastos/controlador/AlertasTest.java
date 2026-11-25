@@ -17,6 +17,7 @@ import es.um.tds.gastos.modelo.*;
 import es.um.tds.gastos.persistencia.AlertasSQLite;
 import es.um.tds.gastos.persistencia.BaseDatos;
 import es.um.tds.gastos.persistencia.CategoriasSQLite;
+import es.um.tds.gastos.persistencia.ErrorPersistenciaException;
 import es.um.tds.gastos.persistencia.GastosSQLite;
 
 class AlertasTest {
@@ -189,7 +190,7 @@ class AlertasTest {
         );
 
         assertThrows(
-            IllegalStateException.class,
+        	ErrorPersistenciaException.class,
             () -> gestion.importarGastos(List.of(repetido, repetido))
         );
 

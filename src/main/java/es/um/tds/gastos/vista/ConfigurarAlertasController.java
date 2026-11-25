@@ -12,9 +12,14 @@ import es.um.tds.gastos.modelo.Alerta;
 import es.um.tds.gastos.modelo.Categoria;
 import es.um.tds.gastos.modelo.PeriodoAlerta;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import es.um.tds.gastos.persistencia.ErrorPersistenciaException;
+
 public class ConfigurarAlertasController {
 
     private GestionGastos gestion;
+    private static final Logger logger = LogManager.getLogger(ConfigurarAlertasController.class);
 
     @FXML private TextField limite;
     @FXML private ComboBox<PeriodoAlerta> periodo;
@@ -71,13 +76,15 @@ public class ConfigurarAlertasController {
             mensaje.setText("Alerta guardada.");
 
         } catch (NumberFormatException e) {
-
             mensaje.setText(
                 "Introduce un límite numérico en euros."
             );
 
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
+            mensaje.setText(e.getMessage());
 
+        } catch (ErrorPersistenciaException e) {
+            logger.error("Error al guardar una alerta", e);
             mensaje.setText(e.getMessage());
         }
     }

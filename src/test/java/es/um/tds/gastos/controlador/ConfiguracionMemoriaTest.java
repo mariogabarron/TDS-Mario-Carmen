@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import es.um.tds.gastos.ConfiguracionMemoria;
 import es.um.tds.gastos.modelo.*;
+import es.um.tds.gastos.persistencia.ErrorPersistenciaException;
 
 class ConfiguracionMemoriaTest {
 
@@ -94,7 +95,7 @@ class ConfiguracionMemoriaTest {
         );
 
         assertThrows(
-            IllegalStateException.class,
+        	ErrorPersistenciaException.class,
             () -> gestion.importarGastos(List.of(gasto, gasto))
         );
 

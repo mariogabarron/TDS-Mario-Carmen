@@ -12,24 +12,36 @@ import es.um.tds.gastos.modelo.Gasto;
 import es.um.tds.gastos.ConfiguracionSQLite;
 import es.um.tds.gastos.controlador.GestionGastos;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import es.um.tds.gastos.persistencia.ErrorPersistenciaException;
+
 public class ConsolaGastos {
 
     private final GestionGastos gestion;
     private final Scanner entrada;
-
+    private static final Logger logger = LogManager.getLogger(ConsolaGastos.class);
+    
     public ConsolaGastos(GestionGastos gestion, Scanner entrada) {
         this.gestion = gestion;
         this.entrada = entrada;
     }
 
     public static void main(String[] args) {
-        GestionGastos gestion = new ConfiguracionSQLite().getGestionGastos();
+
+        logger.info("Iniciando interfaz de consola");
 
         try (Scanner entrada = new Scanner(System.in)) {
-            ConsolaGastos consola =
-                new ConsolaGastos(gestion, entrada);
-
+            GestionGastos gestion =new ConfiguracionSQLite().getGestionGastos();
+            ConsolaGastos consola = new ConsolaGastos(gestion, entrada);
             consola.ejecutar();
+
+        } catch (ErrorPersistenciaException e) {
+            logger.error("Error al iniciar la consola", e);
+            System.out.println("Error: " + e.getMessage());
+
+        } finally {
+            logger.info("Consola finalizada");
         }
     }
 
@@ -68,6 +80,9 @@ public class ConsolaGastos {
                     );
 
                 } catch (IllegalArgumentException e) {
+                    System.out.println("Error: " + e.getMessage());
+                } catch (ErrorPersistenciaException e) {
+                    logger.error("Error de persistencia en consola", e);
                     System.out.println("Error: " + e.getMessage());
                 }
             }

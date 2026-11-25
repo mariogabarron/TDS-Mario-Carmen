@@ -11,11 +11,14 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Alert;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class SceneManager {
 
     private Stage stage;
-    
     private static final SceneManager instancia = new SceneManager();
+    private static final Logger logger = LogManager.getLogger(SceneManager.class);
 
     private SceneManager() {
     }
@@ -95,13 +98,17 @@ public class SceneManager {
 	        dialogo.showAndWait();
 	
 	    } catch (IOException e) {
-	
+
+	        logger.error("No se pudo cargar el FXML: {}", fichero, e);
+
 	        Alert aviso = new Alert(Alert.AlertType.ERROR);
-	
+
 	        aviso.setTitle("Error");
 	        aviso.setHeaderText("No se pudo abrir la ventana");
-	        aviso.setContentText(e.getMessage());
-	
+	        aviso.setContentText(
+	            "Consulta el fichero de registro para más información."
+	        );
+
 	        aviso.showAndWait();
 	    }
 	}
