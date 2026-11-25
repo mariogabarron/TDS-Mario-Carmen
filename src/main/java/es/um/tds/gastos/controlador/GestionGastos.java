@@ -43,6 +43,12 @@ public class GestionGastos {
 	        BigDecimal limite,
 	        PeriodoAlerta periodo,
 	        Categoria categoria) {
+		
+		if (periodo == null) {
+		    throw new IllegalArgumentException(
+		        "Selecciona una periodicidad."
+		    );
+		}
 
 	    if (categoria != null) {
 	        comprobarCategoria(categoria);

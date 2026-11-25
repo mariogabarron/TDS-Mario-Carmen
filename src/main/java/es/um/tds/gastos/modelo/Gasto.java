@@ -1,32 +1,28 @@
+
 package es.um.tds.gastos.modelo;
 
 import java.util.UUID;
 import java.util.Objects;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 
 public final class Gasto {
-	
+
     private final UUID id;
-    private BigDecimal importe;
-    private LocalDate fecha;
-    private Categoria categoria;
+    private final BigDecimal importe;
+    private final LocalDate fecha;
+    private final Categoria categoria;
 
     public Gasto(BigDecimal importe, LocalDate fecha,
                  Categoria categoria) {
         this(UUID.randomUUID(), importe, fecha, categoria);
     }
 
-    public Gasto(UUID id, BigDecimal importe, LocalDate fecha, Categoria categoria) {
-        this.id = Objects.requireNonNull(id);
-        actualizarDatos(importe, fecha, categoria);
-    }
+    public Gasto(UUID id, BigDecimal importe,
+                 LocalDate fecha, Categoria categoria) {
 
-    public void actualizarDatos(BigDecimal importe,
-                                LocalDate fecha,
-                                Categoria categoria) {
+        this.id = Objects.requireNonNull(id);
 
         if (importe == null || importe.signum() <= 0) {
             throw new IllegalArgumentException(
@@ -46,23 +42,21 @@ public final class Gasto {
             );
         }
 
-        BigDecimal importeValidado;
-
         try {
-            importeValidado = importe.setScale(
+            this.importe = importe.setScale(
                 2, RoundingMode.UNNECESSARY
             );
         } catch (ArithmeticException e) {
             throw new IllegalArgumentException(
-                "El importe no puede tener fracciones de céntimo."
+                "El importe no puede tener fracciones de céntimo.",
+                e
             );
         }
 
-        this.importe = importeValidado;
         this.fecha = fecha;
         this.categoria = categoria;
     }
-    
+
     public UUID getId() {
         return id;
     }

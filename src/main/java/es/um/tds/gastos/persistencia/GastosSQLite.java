@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.UUID;
 import es.um.tds.gastos.modelo.Categoria;
 import es.um.tds.gastos.modelo.Gasto;
+
 import java.util.Optional;
+import java.sql.ResultSet;
 
 public final class GastosSQLite implements RepositorioGastos {
     private final BaseDatos base;
@@ -17,35 +19,28 @@ public final class GastosSQLite implements RepositorioGastos {
         this.base = base;
     }
 
-	
-	public List<Gasto> listar() {
-	    return base.conConexion(con -> {
-	        String sql = """
-	            SELECT g.id, g.importe, g.fecha,
-	                   c.id AS categoria_id, c.nombre
-	            FROM gastos g
-	            JOIN categorias c ON c.id = g.categoria_id
-	            ORDER BY g.rowid
-	            """;
-	        var gastos = new ArrayList<Gasto>();
-	        try (var orden = con.createStatement();
-	             var filas = orden.executeQuery(sql)) {
-	            while (filas.next()) {
-	                Categoria categoria = new Categoria(
-	                    UUID.fromString(filas.getString("categoria_id")),
-	                    filas.getString("nombre")
-	                );
-	                gastos.add(new Gasto(
-	                    UUID.fromString(filas.getString("id")),
-	                    new BigDecimal(filas.getString("importe")),
-	                    LocalDate.parse(filas.getString("fecha")),
-	                    categoria
-	                ));
-	            }
-	        }
-	        return List.copyOf(gastos);
-	    });
-	}
+    @Override
+    public List<Gasto> listar() {
+        return base.conConexion(con -> {
+            String sql = """
+                SELECT g.id, g.importe, g.fecha,
+                       c.id AS categoria_id, c.nombre
+                FROM gastos g
+                JOIN categorias c ON c.id = g.categoria_id
+                ORDER BY g.rowid
+                """;
+
+            var gastos = new ArrayList<Gasto>();
+            try (var orden = con.createStatement();
+                 var filas = orden.executeQuery(sql)) {
+
+                while (filas.next()) {
+                    gastos.add(reconstruirGasto(filas));
+                }
+            }
+            return List.copyOf(gastos);
+        });
+    }
 
 	
 	public void agregar(Gasto gasto) {
@@ -102,37 +97,43 @@ public final class GastosSQLite implements RepositorioGastos {
             throw new IllegalArgumentException("El gasto no está registrado.");
         }
     }
+    
+    @Override
+    public Optional<Gasto> buscarPorId(UUID id) {
+        return base.conConexion(con -> {
+            String sql = """
+                SELECT g.id, g.importe, g.fecha,
+                       c.id AS categoria_id, c.nombre
+                FROM gastos g
+                JOIN categorias c ON c.id = g.categoria_id
+                WHERE g.id = ?
+                """;
 
-	@Override
-	public Optional<Gasto> buscarPorId(UUID id) {
-	    return base.conConexion(con -> {
-	        String sql = """
-	            SELECT g.id, g.importe, g.fecha,
-	                   c.id AS categoria_id, c.nombre
-	            FROM gastos g
-	            JOIN categorias c ON c.id = g.categoria_id
-	            WHERE g.id = ?
-	            """;
+            try (var orden = con.prepareStatement(sql)) {
+                orden.setString(1, id.toString());
+                try (var filas = orden.executeQuery()) {
+
+                    if (!filas.next()) {
+                        return Optional.empty();
+                    }
+                    return Optional.of(reconstruirGasto(filas));
+                }
+            }
+        });
+    }
 	
-	        try (var orden = con.prepareStatement(sql)) {
-	            orden.setString(1, id.toString());
-	            try (var filas = orden.executeQuery()) {
-	                if (!filas.next()) {
-	                    return Optional.empty();
-	                }
-	                Categoria categoria = new Categoria(
-	                    UUID.fromString(filas.getString("categoria_id")),
-	                    filas.getString("nombre")
-	                );
-	                return Optional.of(new Gasto(
-	                    UUID.fromString(filas.getString("id")),
-	                    new BigDecimal(filas.getString("importe")),
-	                    LocalDate.parse(filas.getString("fecha")),
-	                    categoria
-	                ));
-	            }
-	        }
-	    });
+	private Gasto reconstruirGasto(ResultSet filas) throws SQLException {
+	    Categoria categoria = new Categoria(
+	        UUID.fromString(filas.getString("categoria_id")),
+	        filas.getString("nombre")
+	    );
+
+	    return new Gasto(
+	        UUID.fromString(filas.getString("id")),
+	        new BigDecimal(filas.getString("importe")),
+	        LocalDate.parse(filas.getString("fecha")),
+	        categoria
+	    );
 	}
 
 }
