@@ -54,6 +54,8 @@ java -cp target/classes es.um.tds.gastos.consola.ConsolaGastos
 | [Diagrama de interacción](docs/diagrama-interaccion-hu01.md) | Interacción entre objetos durante el registro de un gasto. |
 | [Arquitectura y diseño](docs/arquitectura-y-diseno.md) | Organización del sistema y justificación de las decisiones de diseño. |
 | [Patrones de diseño](docs/patrones-de-diseno.md) | Aplicación y justificación de los patrones utilizados. |
+| [Manual de usuario](docs/manual-de-usuario.md) | Explicación del manejo al usuario sobre la aplicación. |
+
 
 ## Estado del proyecto
 
@@ -63,8 +65,8 @@ java -cp target/classes es.um.tds.gastos.consola.ConsolaGastos
 - [x] Representaciones gráficas.
 - [x] Interfaz gráfica y consola interactiva.
 - [x] Arquitectura MVC y configuración centralizada.
-- [ ] Persistencia mediante JDBC y patrón Repositorio.
-- [ ] Alertas y notificaciones.
+- [x] Persistencia mediante JDBC y patrón Repositorio.
+- [x] Alertas y notificaciones.
 - [ ] Cuentas compartidas y reparto de gastos.
 - [ ] Importación de gastos desde ficheros.
 - [ ] Implementación de los patrones de diseño restantes.
