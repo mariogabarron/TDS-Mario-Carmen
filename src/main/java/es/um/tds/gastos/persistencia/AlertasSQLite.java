@@ -36,13 +36,9 @@ public final class AlertasSQLite implements RepositorioAlertas {
     }
 
     public List<Alerta> listar() {
-        try (var con = base.abrir()) {
-            return listar(con);
-        } catch (SQLException e) {
-            throw BaseDatos.error(e);
-        }
+        return base.conConexion(con -> listar(con));
     }
-
+    
     static List<Alerta> listar(Connection con) throws SQLException {
         var alertas = new ArrayList<Alerta>();
         String sql = """
@@ -60,61 +56,6 @@ public final class AlertasSQLite implements RepositorioAlertas {
         return List.copyOf(alertas);
     }
 
-    static void evaluar(Connection con, Gasto actual, Gasto anterior) throws SQLException {
-        for (Alerta alerta : listar(con)) {
-            if (!alerta.corresponde(actual)) {
-                continue;
-            }
-            LocalDate inicio = alerta.periodo().inicio(actual.getFecha());
-            LocalDate fin = alerta.periodo().fin(actual.getFecha());
-            BigDecimal total = sumar(con, alerta, inicio, fin);
-            BigDecimal antes = total.subtract(actual.getImporte());
-            if (anterior != null && alerta.corresponde(anterior)
-                    && !anterior.getFecha().isBefore(inicio) && !anterior.getFecha().isAfter(fin)) {
-                antes = antes.add(anterior.getImporte());
-            }
-            if (antes.compareTo(alerta.limite()) <= 0 && total.compareTo(alerta.limite()) > 0) {
-                guardarAviso(con, alerta, inicio, fin, total);
-            }
-        }
-    }
-
-    private static BigDecimal sumar(Connection con, Alerta alerta, LocalDate inicio, LocalDate fin) throws SQLException {
-        String sql = "SELECT importe FROM gastos WHERE fecha BETWEEN ? AND ?";
-        if (alerta.categoria() != null) {
-            sql += " AND categoria_id=?";
-        }
-        BigDecimal total = BigDecimal.ZERO;
-        try (var orden = con.prepareStatement(sql)) {
-            orden.setString(1, inicio.toString());
-            orden.setString(2, fin.toString());
-            if (alerta.categoria() != null) {
-                orden.setString(3, alerta.categoria().getId().toString());
-            }
-            try (var filas = orden.executeQuery()) {
-                while (filas.next()) {
-                    total = total.add(new BigDecimal(filas.getString(1)));
-                }
-            }
-        }
-        return total;
-    }
-
-    private static void guardarAviso(Connection con, Alerta alerta, LocalDate inicio, LocalDate fin,
-                                    BigDecimal total) throws SQLException {
-        String sql = "INSERT INTO notificaciones(alerta_id, creada, inicio, fin, ambito, limite, total) VALUES(?,?,?,?,?,?,?)";
-        try (var orden = con.prepareStatement(sql)) {
-            orden.setString(1, alerta.id().toString());
-            orden.setString(2, LocalDateTime.now().toString());
-            orden.setString(3, inicio.toString());
-            orden.setString(4, fin.toString());
-            orden.setString(5, alerta.ambito());
-            orden.setString(6, alerta.limite().toPlainString());
-            orden.setString(7, total.toPlainString());
-            orden.executeUpdate();
-        }
-    }
-
     public List<Notificacion> historial() {
         var avisos = new ArrayList<Notificacion>();
         try (var con = base.abrir(); var orden = con.createStatement();
@@ -129,4 +70,34 @@ public final class AlertasSQLite implements RepositorioAlertas {
         }
         return List.copyOf(avisos);
     }
+
+	@Override
+	public void guardarNotificacion(
+	        Alerta alerta,
+	        Notificacion notificacion) {
+	
+	    base.conConexion(con -> {
+	
+	        String sql = """
+	            INSERT INTO notificaciones(
+	                alerta_id, creada, inicio, fin,
+	                ambito, limite, total
+	            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+	            """;
+	
+	        try (var orden = con.prepareStatement(sql)) {
+	            orden.setString(1, alerta.id().toString());
+	            orden.setString(2, notificacion.creada().toString());
+	            orden.setString(3, notificacion.inicio().toString());
+	            orden.setString(4, notificacion.fin().toString());
+	            orden.setString(5, notificacion.ambito());
+	            orden.setString(6, notificacion.limite().toPlainString());
+	            orden.setString(7, notificacion.total().toPlainString());
+	            orden.executeUpdate();
+	        }
+	        
+	        return null;
+	    });
+	}
+
 }

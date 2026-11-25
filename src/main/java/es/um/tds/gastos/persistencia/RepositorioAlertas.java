@@ -8,4 +8,5 @@ public interface RepositorioAlertas {
     void agregar(Alerta alerta);
     List<Alerta> listar();
     List<Notificacion> historial();
+    void guardarNotificacion(Alerta alerta, Notificacion notificacion);
 }

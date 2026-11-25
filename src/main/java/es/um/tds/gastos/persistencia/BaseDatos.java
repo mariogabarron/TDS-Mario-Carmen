@@ -7,8 +7,61 @@ import java.sql.SQLException;
 import java.util.List;
 import es.um.tds.gastos.modelo.Categoria;
 
-public final class BaseDatos {
+public final class BaseDatos implements GestorTransacciones {
+	
     private final String url;
+	private Connection conexionActiva;
+	
+	@FunctionalInterface
+	interface OperacionSQL<T> {
+	    T ejecutar(Connection conexion) throws SQLException;
+	}
+	
+	synchronized <T> T conConexion(OperacionSQL<T> operacion) {
+	    try {
+	        if (conexionActiva != null) {
+	            return operacion.ejecutar(conexionActiva);
+	        }
+	
+	        try (Connection conexion = abrir()) {
+	            return operacion.ejecutar(conexion);
+	        }
+	    } catch (SQLException e) {
+	        throw error(e);
+	    }
+	}
+	
+	@Override
+	public synchronized void ejecutar(Runnable operacion) {
+	    if (conexionActiva != null) {
+	        operacion.run();
+	        return;
+	    }
+	
+	    try (Connection conexion = abrir()) {
+	
+	        conexion.setAutoCommit(false);
+	        conexionActiva = conexion;
+	
+	        try {
+	            operacion.run();
+	            conexion.commit();
+	        } catch (SQLException | RuntimeException | Error e) {
+	            try {
+	                conexion.rollback();
+	            } catch (SQLException falloRollback) {
+	                e.addSuppressed(falloRollback);
+	            }
+	            throw e;
+	
+	        } finally {
+	            conexionActiva = null;
+	        }
+	    } catch (SQLException e) {
+	        throw error(e);
+	    }
+	}
+
 
     public BaseDatos(Path fichero) {
         url = "jdbc:sqlite:" + fichero.toAbsolutePath();

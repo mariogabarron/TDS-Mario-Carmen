@@ -16,30 +16,41 @@ import java.util.stream.Collectors;
 import es.um.tds.gastos.modelo.Categoria;
 import es.um.tds.gastos.modelo.Gasto;
 import es.um.tds.gastos.modelo.FiltroGastos;
+import es.um.tds.gastos.modelo.EvaluadorAlertas;
 
 public class GestionGastos {
 
     private final RepositorioAlertas alertas;
     private final RepositorioGastos gastos;
     private final RepositorioCategorias categorias;
+    private final EvaluadorAlertas evaluador = new EvaluadorAlertas();
+    private final GestorTransacciones transacciones;
 
-    public GestionGastos() {
-        this(new BaseDatos(Path.of(System.getProperty("user.home"), "gestion-gastos-tds.db")));
-    }
-
-    public GestionGastos(BaseDatos base) {
-        this(new GastosSQLite(base), new CategoriasSQLite(base), new AlertasSQLite(base));
-    }
-
-    public GestionGastos(RepositorioGastos gastos, RepositorioCategorias categorias) {
-        this(gastos, categorias, null);
-    }
-
-    public GestionGastos(RepositorioGastos gastos, RepositorioCategorias categorias, RepositorioAlertas alertas) {
-        this.alertas = alertas;
-        this.gastos = gastos;
-        this.categorias = categorias;
-    }
+	
+	public GestionGastos() {
+	    this(new BaseDatos(
+	        Path.of(System.getProperty("user.home"),
+	                "gestion-gastos-tds.db")
+	    ));
+	}
+	
+	public GestionGastos(BaseDatos base) {
+	    this(
+	        new GastosSQLite(base),
+	        new CategoriasSQLite(base),
+	        new AlertasSQLite(base),
+	        base
+	    );
+	}
+	
+	public GestionGastos(RepositorioGastos gastos, RepositorioCategorias categorias, 
+			RepositorioAlertas alertas, GestorTransacciones transacciones) {
+	    this.gastos = gastos;
+	    this.categorias = categorias;
+	    this.alertas = alertas;
+	    this.transacciones = transacciones;
+	}
+	
 
     public void crearAlerta(BigDecimal limite, PeriodoAlerta periodo, Categoria categoria) {
         if (categoria != null) {
@@ -63,9 +74,15 @@ public class GestionGastos {
         return alertas;
     }
 
-    public void importarGastos(List<Gasto> importados) {
-        gastos.importar(List.copyOf(importados));
-    }
+	public void importarGastos(List<Gasto> importados) {
+	    List<Gasto> lote = List.copyOf(importados);
+	    transacciones.ejecutar(() -> {
+	        for (Gasto gasto : lote) {
+	            gastos.agregar(gasto);
+	            evaluarAlertas(gasto, null);
+	        }
+	    });
+	}
 
     public List<Gasto> getGastos() {
         return gastos.listar();
@@ -93,27 +110,44 @@ public class GestionGastos {
         categorias.eliminar(categoria);
     }
 
-    public Gasto registrarGasto(BigDecimal importe,
-                                LocalDate fecha,
-                                Categoria categoria) {
-        comprobarCategoria(categoria);
 
-        Gasto gasto = new Gasto(importe, fecha, categoria);
-        gastos.agregar(gasto);
+	public Gasto registrarGasto(BigDecimal importe,
+	        					LocalDate fecha, Categoria categoria) {
+	
+	    comprobarCategoria(categoria);
+	    Gasto gasto = new Gasto(importe, fecha, categoria);
+	    transacciones.ejecutar(() -> {
+	        gastos.agregar(gasto);
+	        evaluarAlertas(gasto, null);
+	    });
+	
+	    return gasto;
+	}
 
-        return gasto;
-    }
+	public void modificarGasto(Gasto gasto, BigDecimal importe,
+	        			LocalDate fecha, Categoria categoria) {
+	
+	    comprobarGasto(gasto);
+	    comprobarCategoria(categoria);
+	
+	    Gasto actualizado = new Gasto(
+	        gasto.getId(), importe, fecha, categoria
+	    );
+	
+	    transacciones.ejecutar(() -> {
+	        Gasto anterior = gastos.listar().stream()
+	            .filter(g -> g.getId().equals(gasto.getId()))
+	            .findFirst()
+	            .orElseThrow(() -> new IllegalArgumentException(
+	                "El gasto no está registrado."
+	            ));
+	
+	        gastos.modificar(actualizado);
+	        evaluarAlertas(actualizado, anterior);
+	    });
+	    gasto.actualizarDatos(importe, fecha, categoria);
+	}
 
-    public void modificarGasto(Gasto gasto,
-                               BigDecimal importe,
-                               LocalDate fecha,
-                               Categoria categoria) {
-        comprobarGasto(gasto);
-        comprobarCategoria(categoria);
-
-        gastos.modificar(new Gasto(gasto.getId(), importe, fecha, categoria));
-        gasto.actualizarDatos(importe, fecha, categoria);
-    }
 
     public void eliminarGasto(Gasto gasto) {
         comprobarGasto(gasto);
@@ -164,6 +198,20 @@ public class GestionGastos {
         return getGastos().stream()
             .filter(filtro::cumple)
             .toList();
+    }
+    
+    private void evaluarAlertas(Gasto actual, Gasto anterior) {
+
+        List<Gasto> registrados = gastos.listar();
+
+        for (Alerta alerta : alertas.listar()) {
+
+            evaluador.evaluar(
+                alerta, actual, anterior, registrados
+            ).ifPresent(notificacion ->
+                alertas.guardarNotificacion(alerta, notificacion)
+            );
+        }
     }
     
 }
