@@ -1,28 +1,26 @@
-# Arquitectura de la aplicación y decisiones de diseño
+# Arquitectura y decisiones de diseño
 
-Gestión de Gastos es una aplicación de escritorio que permite trabajar desde una ventana JavaFX y desde la línea de comandos. Para organizarla, partimos de una operación que se puede hacer por ambas vías: registrar un gasto. Cambia la forma de introducir el importe, la fecha y la categoría, pero las reglas que debe cumplir el gasto son las mismas.
+| Responsabilidad | Clases y comportamiento |
+|---|---|
+| Presentación | JavaFX recoge los datos del formulario y muestra la tabla y los gráficos. La consola presenta un menú interactivo. Ambas entradas llaman a las operaciones de gestión. |
+| Aplicación | `GestionGastos` coordina el alta, la edición, el borrado, las consultas y la configuración de alertas. |
+| Dominio | `Gasto` valida el importe, la fecha y la categoría. `FiltroGastos` aplica los criterios de consulta. `Alerta` contiene el límite y el ámbito. `PeriodoAlerta` determina las fechas de evaluación. |
+| Persistencia | Los contratos `RepositorioGastos`, `RepositorioCategorias` y `RepositorioAlertas` exponen operaciones con objetos de dominio. Sus implementaciones SQLite ejecutan SQL mediante JDBC. `BaseDatos` prepara el esquema y las conexiones. |
 
-## Cómo se reparten las responsabilidades
+## Registro e identidad
 
-| Parte | Responsabilidad en el diseño |
-| --- | --- |
-| Presentación | El formulario JavaFX recoge los datos y muestra el resultado. En la terminal, esa misma tarea consiste en interpretar los argumentos del comando y comunicar el resultado por texto. |
-| Aplicación | `GestionGastos` coordina la operación. Para registrar un gasto, comprueba que la categoría esté registrada, crea el gasto y solicita su guardado. Ambas interfaces pueden llamar a la misma operación. |
-| Dominio | `Gasto` reúne el importe, la fecha y la categoría, y valida sus propios datos. `FiltroGastos` determina si un gasto cumple los criterios de una consulta. |
-| Persistencia | El repositorio se encarga de guardar y recuperar los datos mediante JDBC. Así, el código que registra el gasto puede pedir que se guarde sin conocer las tablas ni escribir SQL. |
+`GestionGastos.registrarGasto` comprueba que la categoría esté registrada, construye el gasto y llama a `RepositorioGastos.agregar`. El gasto y la categoría tienen identificadores UUID que se conservan al leerlos de SQLite. La igualdad de categoría depende del identificador. Así, la categoría seleccionada en un filtro coincide con la que se recupera en una consulta posterior aunque sean dos objetos Java distintos.
 
-El flujo documentado inicialmente guarda los gastos en memoria. El [diagrama de interacción de la HU-01](diagrama-interaccion-hu01.md) recoge el diseño con persistencia: la interfaz muestra el alta como completada cuando el repositorio confirma la escritura. Si falla el guardado, el usuario puede saber que ese apunte sigue pendiente.
+## Consultas y gráficos
 
-## Decisiones de diseño
+Los meses seleccionados se combinan entre sí y las categorías seleccionadas también. Para entrar en el resultado, el gasto debe cumplir simultáneamente el criterio de mes, el de categoría y el intervalo de fechas. Los extremos indicados son inclusivos. La tabla y las gráficas representan los gastos de la consulta. El importe acumulado por categoría se calcula con `BigDecimal`.
 
-**Compartir el registro entre las dos interfaces.** Situamos la operación en la capa de aplicación para que tanto el formulario como la terminal deleguen en ella. Si una categoría deja de ser válida, ambas entradas deben rechazar el mismo gasto. Podemos comprobarlo invocando la operación sin abrir una ventana.
+## Alertas y transacciones
 
-**Delimitar cuándo se confirma el alta.** En el diseño con persistencia, la operación de registro depende de un repositorio con una operación de guardado. La implementación JDBC gestiona la escritura y comunica cualquier fallo a la capa de aplicación. Mostrar el gasto como confirmado solo después del guardado evita que el usuario vea un apunte que desaparecería al reiniciar.
+El registro o la edición de un gasto y las notificaciones que genera se confirman en la misma transacción. Después de escribir el gasto, `GastosSQLite` llama a `AlertasSQLite.evaluar` con la misma conexión. Al editar, se recuperan primero los datos anteriores para determinar si se acaba de cruzar el límite. La notificación conserva las fechas del periodo, la categoría o ámbito general, el límite y el total alcanzado.
 
-**Repartir las validaciones según quién conoce los datos.** Para saber si una categoría está registrada hace falta consultar las categorías disponibles, de ahí que la comprobación corresponda a `GestionGastos`. En cambio, `Gasto` dispone de sus propios datos para validarlos tanto al crearse como al modificarse. Así evitamos mantener una versión de las reglas para el alta y otra para la edición.
+`GestionGastos.importarGastos` admite una lista de gastos ya interpretados. La implementación SQLite procesa el lote en una transacción y revierte tanto los gastos como sus avisos si falla una escritura. La lectura de formatos bancarios corresponde a la HU-16.
 
-**Dar el mismo significado a los filtros en todas las vistas.** Concentramos los criterios en `FiltroGastos`. Por ejemplo, al seleccionar «julio», «agosto» y «Transporte», un gasto entra si pertenece a cualquiera de esos dos meses y, además, es de transporte. El diseño prevé usar esa misma selección para la tabla y para el gráfico. De este modo, el total representado se puede contrastar con los apuntes visibles.
+## Configuración de las interfaces
 
-**Distinguir una alerta del aviso que genera.** En el modelo, una alerta describe una regla, como superar 100 € al mes en videojuegos. Una notificación recoge una ocasión concreta en que se superó el límite. Esta distinción permite consultar en el historial qué ocurrió en un mes anterior aunque el usuario haya cambiado después su presupuesto.
-
-El [modelo de dominio](diagramas-gestion-gastos.md) recoge las multiplicidades y restricciones que aplican estas decisiones. 
+JavaFX registra la configuración de la ejecución y sus controladores obtienen el servicio de gestión mediante `Configuracion.getInstancia().getGestionGastos()`. La consola crea su propio servicio. Las dos interfaces resuelven la ubicación de la base a partir de la carpeta personal del usuario, por lo que pueden recuperar los mismos datos aunque arranquen desde directorios distintos.

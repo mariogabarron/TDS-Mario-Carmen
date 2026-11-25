@@ -25,6 +25,7 @@
             <Label text="Gestión de gastos"
                    style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
             <Label fx:id="etiquetaTotal"/>
+            <fx:include source="acciones-alertas.fxml"/>
             <VBox spacing="8">
                 <Label text="Filtrar gastos"/>
                 <HBox spacing="10" alignment="CENTER_LEFT">

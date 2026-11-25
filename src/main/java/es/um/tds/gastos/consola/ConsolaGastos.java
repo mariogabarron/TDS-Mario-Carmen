@@ -35,7 +35,7 @@ public class ConsolaGastos {
     public void ejecutar() {
         System.out.println("GESTIÓN DE GASTOS — CONSOLA");
         System.out.println(
-            "Los datos se conservan durante esta ejecución."
+            "Los datos se guardan en SQLite."
         );
 
         boolean continuar = true;

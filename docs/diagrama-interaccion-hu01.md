@@ -2,7 +2,7 @@
 
 Como usuario, quiero registrar un gasto con su importe, fecha y categoría para llevar un control de mis gastos.
 
-El diagrama de secuencia UML representa el diseño previsto para el registro desde la interfaz gráfica. Los mensajes se leen de arriba abajo. Los nombres de los participantes indican responsabilidades de diseño y los bloques de alternativas distinguen el resultado de cada validación.
+El diagrama de secuencia UML representa el registro desde la interfaz gráfica. Los mensajes se leen de arriba abajo. Los nombres de los participantes indican responsabilidades de diseño y los bloques de alternativas distinguen el resultado de cada validación.
 
 **Precondición.** El usuario ha abierto el formulario y dispone de al menos una categoría registrada.
 
@@ -28,15 +28,15 @@ sequenceDiagram
             V-->>U: Mostrar el error para corregir los datos
         else Datos válidos
             G-->>C: Gasto creado
-            C->>R: guardar(gasto)
+            C->>R: agregar(gasto)
+            Note over R: Escribe el gasto y evalúa las alertas en una transacción
             alt Escritura confirmada
                 R-->>C: Guardado correcto
                 C-->>V: Gasto registrado
                 V-->>U: Mostrar el gasto en la lista
             else Fallo de escritura
                 R-->>C: Error de persistencia
-                C-->>V: Registro fallido
-                V-->>U: Informar del fallo al guardar
+                C-->>V: Propagar el error de persistencia
             end
         end
     end

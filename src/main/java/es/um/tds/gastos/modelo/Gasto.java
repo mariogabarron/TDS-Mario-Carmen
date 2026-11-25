@@ -1,10 +1,19 @@
 package es.um.tds.gastos.modelo;
 
+import java.util.UUID;
+import java.util.Objects;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 
 public class Gasto {
+    private final UUID id;
+
+    public UUID getId() {
+        return id;
+    }
+
 
     private BigDecimal importe;
     private LocalDate fecha;
@@ -12,6 +21,11 @@ public class Gasto {
 
     public Gasto(BigDecimal importe, LocalDate fecha,
                  Categoria categoria) {
+        this(UUID.randomUUID(), importe, fecha, categoria);
+    }
+
+    public Gasto(UUID id, BigDecimal importe, LocalDate fecha, Categoria categoria) {
+        this.id = Objects.requireNonNull(id);
         actualizarDatos(importe, fecha, categoria);
     }
 

@@ -10,10 +10,12 @@ Esta parte recoge las clases de `modelo` que ya existen. Cada gasto pertenece a 
 classDiagram
 direction LR
 class Gasto {
+    UUID id
     BigDecimal importe
     LocalDate fecha
 }
 class Categoria {
+    UUID id
     String nombre
 }
 class FiltroGastos {
@@ -30,23 +32,30 @@ Por ejemplo, un gasto de 12 € en Transporte del 24 de noviembre cumple un filt
 
 ### Alertas y notificaciones
 
-Propuesta de dominio basada en el enunciado. La alerta define un límite semanal o mensual. Puede aplicarse al total general o a una categoría concreta. Las notificaciones se generan al superar el límite y forman el historial consultable. `Categoria` representa el mismo concepto que en el primer dibujo.
+La alerta define un límite semanal o mensual. Puede aplicarse al total general o a una categoría concreta. Las notificaciones se generan al superar el límite y forman el historial consultable. `Categoria` representa el mismo concepto que en el primer dibujo.
 
 ```mermaid
 classDiagram
 direction LR
 class Alerta {
-    importeLimite
-    periodicidad
+    UUID id
+    BigDecimal limite
+    PeriodoAlerta periodo
 }
 class Categoria
 class Notificacion {
-    fecha
-    mensaje
+    LocalDateTime creada
+    LocalDate inicio
+    LocalDate fin
+    String ambito
+    BigDecimal limite
+    BigDecimal total
 }
 Alerta "0..*" --> "0..1" Categoria : restringe a
 Alerta "1" -- "0..*" Notificacion : genera
 ```
+
+La tabla de notificaciones vincula cada aviso a su alerta mediante `alerta_id`. El historial se ordena desde el aviso más reciente y construye el texto a partir de los datos guardados.
 
 ### Cuentas compartidas
 
