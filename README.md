@@ -54,6 +54,8 @@ java -cp target/classes es.um.tds.gastos.consola.ConsolaGastos
 | [Diagrama de interacción](docs/diagrama-interaccion-hu01.md) | Interacción entre objetos durante el registro de un gasto. |
 | [Arquitectura y diseño](docs/arquitectura-y-diseno.md) | Organización del sistema y justificación de las decisiones de diseño. |
 | [Patrones de diseño](docs/patrones-de-diseno.md) | Aplicación y justificación de los patrones utilizados. |
+| [Manual de usuario](docs/manual-de-usuario.md) | Explicación del manejo al usuario sobre la aplicación. |
+
 
 ## Estado del proyecto
 
