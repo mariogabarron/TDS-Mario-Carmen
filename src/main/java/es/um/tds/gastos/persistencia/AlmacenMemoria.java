@@ -100,11 +100,6 @@ public final class AlmacenMemoria implements GestorTransacciones {
                     );
                 }
             }
-
-            @Override
-            public void importar(List<Gasto> lote) {
-                ejecutar(() -> lote.forEach(this::agregar));
-            }
         };
     }
 

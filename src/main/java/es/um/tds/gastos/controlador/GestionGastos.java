@@ -141,7 +141,6 @@ public class GestionGastos {
 	        gastos.modificar(actualizado);
 	        evaluarAlertas(actualizado, anterior);
 	    });
-	    gasto.actualizarDatos(importe, fecha, categoria);
 	}
 
 

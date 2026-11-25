@@ -60,13 +60,6 @@ public final class GastosSQLite implements RepositorioGastos {
 	    });
 	}
 	
-	@Override
-	public void importar(List<Gasto> gastos) {
-	    base.ejecutar(() -> {
-	        gastos.forEach(this::agregar);
-	    });
-	}
-	
 	public void modificar(Gasto gasto) {
 	    base.conConexion(con -> {
 	        escribir(con,
