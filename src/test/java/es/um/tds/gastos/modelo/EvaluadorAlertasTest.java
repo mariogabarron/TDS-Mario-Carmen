@@ -27,7 +27,7 @@ class EvaluadorAlertasTest {
     private final Alerta alerta = new Alerta(
         UUID.randomUUID(),
         new BigDecimal("100"),
-        PeriodoAlerta.MENSUAL,
+        new PeriodoMensual(),
         juegos
     );
 
@@ -130,7 +130,7 @@ class EvaluadorAlertasTest {
         Alerta general = new Alerta(
             UUID.randomUUID(),
             new BigDecimal("100"),
-            PeriodoAlerta.MENSUAL,
+            new PeriodoMensual(),
             null
         );
 

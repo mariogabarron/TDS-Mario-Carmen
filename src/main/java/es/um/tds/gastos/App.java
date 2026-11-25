@@ -12,7 +12,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
 
-        Configuracion configuracion = new ConfiguracionSQLite();
+        Configuracion configuracion = new ConfiguracionMemoria();
         Configuracion.setInstancia(configuracion);
         configuracion.getViewController().inicializar(stage);
 

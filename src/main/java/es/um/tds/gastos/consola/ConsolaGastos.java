@@ -10,6 +10,7 @@ import java.util.Scanner;
 import es.um.tds.gastos.aplicacion.GestionGastos;
 import es.um.tds.gastos.modelo.Categoria;
 import es.um.tds.gastos.modelo.Gasto;
+import es.um.tds.gastos.ConfiguracionSQLite;
 
 public class ConsolaGastos {
 
@@ -22,7 +23,7 @@ public class ConsolaGastos {
     }
 
     public static void main(String[] args) {
-        GestionGastos gestion = new GestionGastos();
+        GestionGastos gestion = new ConfiguracionSQLite().getGestionGastos();
 
         try (Scanner entrada = new Scanner(System.in)) {
             ConsolaGastos consola =

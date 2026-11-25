@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import es.um.tds.gastos.ConfiguracionSQLite;
 import es.um.tds.gastos.modelo.*;
 import es.um.tds.gastos.persistencia.AlertasSQLite;
 import es.um.tds.gastos.persistencia.BaseDatos;
@@ -33,7 +34,7 @@ class AlertasTest {
     @BeforeEach
     void inicializar() {
         fichero = directorio.resolve("alertas.db");
-        gestion = new GestionGastos(new BaseDatos(fichero));
+        gestion = new ConfiguracionSQLite(fichero).getGestionGastos();
 
         juegos = gestion.crearCategoria("Videojuegos");
         otra = gestion.getCategorias().getFirst();

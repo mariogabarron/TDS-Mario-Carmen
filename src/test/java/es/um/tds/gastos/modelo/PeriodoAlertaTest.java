@@ -8,6 +8,9 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 class PeriodoAlertaTest {
+	
+	private final EstrategiaPeriodo semanal = new PeriodoSemanal();
+	private final EstrategiaPeriodo mensual = new PeriodoMensual();
 
     @Test
     void periodoSemanal() {
@@ -16,12 +19,12 @@ class PeriodoAlertaTest {
 
         assertEquals(
             LocalDate.of(2026, 11, 23),
-            PeriodoAlerta.SEMANAL.inicio(fecha)
+            semanal
         );
 
         assertEquals(
             LocalDate.of(2026, 11, 29),
-            PeriodoAlerta.SEMANAL.fin(fecha)
+            semanal
         );
     }
 
@@ -32,12 +35,12 @@ class PeriodoAlertaTest {
 
         assertEquals(
             LocalDate.of(2026, 12, 28),
-            PeriodoAlerta.SEMANAL.inicio(fecha)
+            semanal
         );
 
         assertEquals(
             LocalDate.of(2027, 1, 3),
-            PeriodoAlerta.SEMANAL.fin(fecha)
+            semanal
         );
     }
 
@@ -48,12 +51,12 @@ class PeriodoAlertaTest {
 
         assertEquals(
             LocalDate.of(2026, 11, 1),
-            PeriodoAlerta.MENSUAL.inicio(fecha)
+            mensual
         );
 
         assertEquals(
             LocalDate.of(2026, 11, 30),
-            PeriodoAlerta.MENSUAL.fin(fecha)
+            mensual
         );
     }
 
@@ -64,7 +67,7 @@ class PeriodoAlertaTest {
 
         assertEquals(
             LocalDate.of(2028, 2, 29),
-            PeriodoAlerta.MENSUAL.fin(fecha)
+            mensual
         );
     }
 
@@ -75,7 +78,7 @@ class PeriodoAlertaTest {
 
         assertEquals(
             LocalDate.of(2027, 2, 28),
-            PeriodoAlerta.MENSUAL.fin(fecha)
+            mensual
         );
     }
 }

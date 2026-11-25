@@ -2,8 +2,6 @@ package es.um.tds.gastos.aplicacion;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.nio.file.Path;
-import es.um.tds.gastos.persistencia.*;
 import java.util.List;
 import java.util.UUID;
 import es.um.tds.gastos.modelo.Alerta;
@@ -18,6 +16,11 @@ import es.um.tds.gastos.modelo.Gasto;
 import es.um.tds.gastos.modelo.FiltroGastos;
 import es.um.tds.gastos.modelo.EvaluadorAlertas;
 
+import es.um.tds.gastos.persistencia.RepositorioGastos;
+import es.um.tds.gastos.persistencia.RepositorioCategorias;
+import es.um.tds.gastos.persistencia.RepositorioAlertas;
+import es.um.tds.gastos.persistencia.GestorTransacciones;
+
 public class GestionGastos {
 
     private final RepositorioAlertas alertas;
@@ -25,23 +28,6 @@ public class GestionGastos {
     private final RepositorioCategorias categorias;
     private final EvaluadorAlertas evaluador = new EvaluadorAlertas();
     private final GestorTransacciones transacciones;
-
-	
-	public GestionGastos() {
-	    this(new BaseDatos(
-	        Path.of(System.getProperty("user.home"),
-	                "gestion-gastos-tds.db")
-	    ));
-	}
-	
-	public GestionGastos(BaseDatos base) {
-	    this(
-	        new GastosSQLite(base),
-	        new CategoriasSQLite(base),
-	        new AlertasSQLite(base),
-	        base
-	    );
-	}
 	
 	public GestionGastos(RepositorioGastos gastos, RepositorioCategorias categorias, 
 			RepositorioAlertas alertas, GestorTransacciones transacciones) {
