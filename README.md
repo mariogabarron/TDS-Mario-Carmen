@@ -57,17 +57,32 @@ java -cp target/classes es.um.tds.gastos.consola.ConsolaGastos
 | [Manual de usuario](docs/manual-de-usuario.md) | Explicación del manejo al usuario sobre la aplicación. |
 
 
-## Estado del proyecto
+## Lo que queda por hacer
 
-- [x] Registro, modificación y eliminación de gastos.
-- [x] Gestión de categorías.
-- [x] Consulta y filtrado combinado de gastos.
-- [x] Representaciones gráficas.
-- [x] Interfaz gráfica y consola interactiva.
-- [x] Arquitectura MVC y configuración centralizada.
-- [x] Persistencia mediante JDBC y patrón Repositorio.
-- [x] Alertas y notificaciones.
-- [ ] Cuentas compartidas y reparto de gastos.
-- [ ] Importación de gastos desde ficheros.
-- [ ] Implementación de los patrones de diseño restantes.
-- [ ] Manual de usuario.
+### Cierre de la implementación actual
+
+- [ ] Mostrar una notificación inmediata al superar el límite de una alerta.
+- [ ] Ampliar las pruebas unitarias de gastos, categorías, filtros y validaciones.
+- [ ] Añadir pruebas de búsqueda por identificador y persistencia.
+- [ ] Reforzar las pruebas de rollback y consistencia transaccional.
+- [ ] Verificar el funcionamiento de JavaFX y la consola.
+
+### Funcionalidades pendientes
+
+- [ ] Implementar cuentas compartidas.
+- [ ] Implementar reparto equitativo y porcentual mediante el patrón Estrategia.
+- [ ] Implementar el cálculo y la consulta de saldos.
+- [ ] Implementar la importación de ficheros mediante los patrones Adaptador y Método Factoría.
+- [ ] Añadir pruebas unitarias y de integración de las nuevas funcionalidades.
+
+### Mejoras opcionales
+
+- [ ] Implementar una vista de calendario.
+- [ ] Mejorar el diseño visual y la usabilidad de JavaFX.
+- [ ] Sincronizar las categorías de los filtros ante modificaciones y eliminaciones.
+- [ ] Diferenciar los errores de persistencia de los errores de actualización de la vista.
+
+### Documentación y entrega
+
+- [ ] Actualizar la documentación (`docs`, README, diagramas y manual de usuario).
+- [ ] Ejecutar todas las pruebas y verificar el funcionamiento desde una instalación limpia.
