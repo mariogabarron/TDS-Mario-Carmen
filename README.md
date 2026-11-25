@@ -63,8 +63,8 @@ java -cp target/classes es.um.tds.gastos.consola.ConsolaGastos
 - [x] Representaciones gráficas.
 - [x] Interfaz gráfica y consola interactiva.
 - [x] Arquitectura MVC y configuración centralizada.
-- [ ] Persistencia mediante JDBC y patrón Repositorio.
-- [ ] Alertas y notificaciones.
+- [x] Persistencia mediante JDBC y patrón Repositorio.
+- [x] Alertas y notificaciones.
 - [ ] Cuentas compartidas y reparto de gastos.
 - [ ] Importación de gastos desde ficheros.
 - [ ] Implementación de los patrones de diseño restantes.
