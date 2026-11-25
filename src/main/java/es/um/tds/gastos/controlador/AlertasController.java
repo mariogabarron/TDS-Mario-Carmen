@@ -1,4 +1,3 @@
-
 package es.um.tds.gastos.controlador;
 
 import javafx.fxml.FXML;
