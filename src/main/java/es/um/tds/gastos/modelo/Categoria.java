@@ -3,7 +3,7 @@ package es.um.tds.gastos.modelo;
 import java.util.UUID;
 import java.util.Objects;
 
-public class Categoria {
+public final class Categoria {
     private final UUID id;
 
     public UUID getId() {
