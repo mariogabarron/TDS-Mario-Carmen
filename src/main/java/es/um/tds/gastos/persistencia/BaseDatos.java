@@ -105,7 +105,7 @@ public final class BaseDatos implements GestorTransacciones {
         }
     }
 
-    Connection abrir() throws SQLException {
+    private Connection abrir() throws SQLException {
         Connection conexion = DriverManager.getConnection(url);
         try (var orden = conexion.createStatement()) {
             orden.execute("PRAGMA foreign_keys = ON");

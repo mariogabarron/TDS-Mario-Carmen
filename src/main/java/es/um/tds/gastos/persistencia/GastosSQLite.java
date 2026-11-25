@@ -91,14 +91,17 @@ public final class GastosSQLite implements RepositorioGastos {
         }
     }
 
-    public void eliminar(Gasto gasto) {
-        try (var con = base.abrir(); var orden = con.prepareStatement("DELETE FROM gastos WHERE id=?")) {
-            orden.setString(1, gasto.getId().toString());
-            comprobar(orden.executeUpdate());
-        } catch (SQLException e) {
-            throw BaseDatos.error(e);
-        }
-    }
+	@Override
+	public void eliminar(Gasto gasto) {
+	    base.conConexion(con -> {
+	        try (var orden = con.prepareStatement(
+	                "DELETE FROM gastos WHERE id=?")) {
+	            orden.setString(1, gasto.getId().toString());
+	            comprobar(orden.executeUpdate());
+	        }
+	        return null;
+	    });
+	}
 
     private static void comprobar(int filas) {
         if (filas == 0) {

@@ -153,7 +153,7 @@ public class GastosViewController {
                 "Introduce un importe válido, por ejemplo 23,50."
             );
 
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             mostrarError(e.getMessage());
         }
     }
@@ -224,7 +224,7 @@ public class GastosViewController {
                 prepararNuevoGasto();
                 actualizarTabla();
 
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | IllegalStateException e) {
                 mostrarError(e.getMessage());
             }
         }
@@ -247,7 +247,7 @@ public class GastosViewController {
                 actualizarCategorias();
                 campoCategoria.setValue(nueva);
 
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | IllegalStateException e) {
                 mostrarError(e.getMessage());
             }
         });
@@ -270,7 +270,7 @@ public class GastosViewController {
             prepararNuevoGasto();
             actualizarTabla();
 
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             mostrarError(e.getMessage());
         }
     }

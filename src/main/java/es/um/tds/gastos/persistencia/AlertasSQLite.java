@@ -18,22 +18,29 @@ public final class AlertasSQLite implements RepositorioAlertas {
         this.base = base;
     }
 
-    public void agregar(Alerta alerta) {
-        try (var con = base.abrir(); var orden = con.prepareStatement(
-                "INSERT INTO alertas(id, limite, periodo, categoria_id) VALUES (?, ?, ?, ?)")) {
-            orden.setString(1, alerta.id().toString());
-            orden.setString(2, alerta.limite().toPlainString());
-            orden.setString(3, alerta.periodo().codigo());
-            if (alerta.categoria() == null) {
-                orden.setNull(4, Types.VARCHAR);
-            } else {
-                orden.setString(4, alerta.categoria().getId().toString());
-            }
-            orden.executeUpdate();
-        } catch (SQLException e) {
-            throw BaseDatos.error(e);
-        }
-    }
+	@Override
+	public void agregar(Alerta alerta) {
+	    base.conConexion(con -> {
+	        String sql = """
+	            INSERT INTO alertas(id, limite, periodo, categoria_id)
+	            VALUES (?, ?, ?, ?)
+	            """;
+	        try (var orden = con.prepareStatement(sql)) {
+	            orden.setString(1, alerta.id().toString());
+	            orden.setString(2, alerta.limite().toPlainString());
+	            orden.setString(3, alerta.periodo().codigo());
+	            if (alerta.categoria() == null) {
+	                orden.setNull(4, Types.VARCHAR);
+	            } else {
+	                orden.setString(
+	                    4, alerta.categoria().getId().toString()
+	                );
+	            }
+	            orden.executeUpdate();
+	        }
+	        return null;
+	    });
+	}
 
     public List<Alerta> listar() {
         return base.conConexion(con -> listar(con));
@@ -56,20 +63,31 @@ public final class AlertasSQLite implements RepositorioAlertas {
         return List.copyOf(alertas);
     }
 
-    public List<Notificacion> historial() {
-        var avisos = new ArrayList<Notificacion>();
-        try (var con = base.abrir(); var orden = con.createStatement();
-             var filas = orden.executeQuery("SELECT creada,inicio,fin,ambito,limite,total FROM notificaciones ORDER BY id DESC")) {
-            while (filas.next()) {
-                avisos.add(new Notificacion(LocalDateTime.parse(filas.getString(1)), LocalDate.parse(filas.getString(2)),
-                    LocalDate.parse(filas.getString(3)), filas.getString(4), new BigDecimal(filas.getString(5)),
-                    new BigDecimal(filas.getString(6))));
-            }
-        } catch (SQLException e) {
-            throw BaseDatos.error(e);
-        }
-        return List.copyOf(avisos);
-    }
+	@Override
+	public List<Notificacion> historial() {
+	    return base.conConexion(con -> {
+	        var avisos = new ArrayList<Notificacion>();
+	        String sql = """
+	            SELECT creada, inicio, fin, ambito, limite, total
+	            FROM notificaciones
+	            ORDER BY id DESC
+	            """;
+	        try (var orden = con.createStatement();
+	             var filas = orden.executeQuery(sql)) {
+	            while (filas.next()) {
+	                avisos.add(new Notificacion(
+	                    LocalDateTime.parse(filas.getString(1)),
+	                    LocalDate.parse(filas.getString(2)),
+	                    LocalDate.parse(filas.getString(3)),
+	                    filas.getString(4),
+	                    new BigDecimal(filas.getString(5)),
+	                    new BigDecimal(filas.getString(6))
+	                ));
+	            }
+	        }
+	        return List.copyOf(avisos);
+	    });
+	}
 
 	@Override
 	public void guardarNotificacion(

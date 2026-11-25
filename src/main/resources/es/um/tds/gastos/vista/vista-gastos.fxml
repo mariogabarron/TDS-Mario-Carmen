@@ -11,7 +11,7 @@
 <!-- Hemos trasladado a FXML la estructura visual de la pantalla de gastos. -->
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="es.um.tds.gastos.controlador.GastosManager">
+            fx:controller="es.um.tds.gastos.controlador.GastosViewController">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
