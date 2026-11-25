@@ -13,7 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import es.um.tds.gastos.modelo.*;
+import es.um.tds.gastos.persistencia.AlertasSQLite;
 import es.um.tds.gastos.persistencia.BaseDatos;
+import es.um.tds.gastos.persistencia.CategoriasSQLite;
+import es.um.tds.gastos.persistencia.GastosSQLite;
 
 class AlertasTest {
 
@@ -129,7 +132,14 @@ class AlertasTest {
 
         gestion.registrarGasto(new BigDecimal("101"), fecha, juegos);
 
-        gestion = new GestionGastos(new BaseDatos(fichero));
+        BaseDatos base = new BaseDatos(fichero);
+
+        gestion = new GestionGastos(
+            new GastosSQLite(base),
+            new CategoriasSQLite(base),
+            new AlertasSQLite(base),
+            base
+        );
 
         assertEquals(1, gestion.getAlertas().size());
         assertEquals(1, gestion.getHistorial().size());
