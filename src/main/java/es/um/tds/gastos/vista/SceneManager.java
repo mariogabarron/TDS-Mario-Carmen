@@ -58,7 +58,11 @@ public class SceneManager {
     }
     
 
-	public void mostrarConfiguracionAlertas() {
+	public void mostrarCuentas() {
+        mostrarDialogo("cuentas-compartidas.fxml", "Cuentas compartidas");
+    }
+
+    public void mostrarConfiguracionAlertas() {
 	    mostrarDialogo(
 	        "configurar-alertas.fxml",
 	        "Alertas de gasto"

@@ -38,6 +38,11 @@ public class GastosViewController {
 
     private static final Logger logger = LogManager.getLogger(GastosViewController.class);
     
+    @FXML
+    private void mostrarCuentas() {
+        SceneManager.getInstancia().mostrarCuentas();
+    }
+
     @FXML private TableView<Gasto> tabla;
     @FXML private TableColumn<Gasto, LocalDate> columnaFecha;
     @FXML private TableColumn<Gasto, String> columnaCategoria;

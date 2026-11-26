@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<DialogPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="es.um.tds.gastos.vista.CuentasController" prefWidth="550">
+    <content>
+        <VBox spacing="8">
+            <padding><Insets top="14" right="14" bottom="14" left="14"/></padding>
+            <TabPane tabClosingPolicy="UNAVAILABLE">
+                <tabs>
+                    <Tab text="Pagos y saldos" fx:id="consulta">
+                        <VBox spacing="8">
+                            <Label text="Cuenta compartida"/>
+                            <ComboBox fx:id="cuenta" onAction="#seleccionar" maxWidth="Infinity"/>
+                            <Label text="Quién ha pagado"/>
+                            <ComboBox fx:id="pagador" maxWidth="Infinity"/>
+                            <Label text="Importe (€)"/>
+                            <TextField fx:id="importe" promptText="Ejemplo: 30,00"/>
+                            <Button text="Registrar pago" onAction="#registrar"/>
+                            <Label text="Saldos por integrante"/>
+                            <ListView fx:id="saldos" prefHeight="145"/>
+                        </VBox>
+                    </Tab>
+                    <Tab text="Nueva cuenta">
+                        <VBox spacing="8">
+                            <Label text="Nombre de la cuenta"/>
+                            <TextField fx:id="nombreCuenta"/>
+                            <CheckBox fx:id="porcentual" text="Reparto por porcentajes" onAction="#cambiarReparto"/>
+                            <Label text="Integrante"/>
+                            <HBox spacing="6">
+                                <TextField fx:id="persona" promptText="Nombre"/>
+                                <TextField fx:id="porcentaje" promptText="Porcentaje" prefWidth="105"/>
+                                <Button text="Añadir" onAction="#anadir"/>
+                            </HBox>
+                            <ListView fx:id="lista" prefHeight="110"/>
+                            <HBox spacing="6">
+                                <Button text="Quitar seleccionado" onAction="#quitar"/>
+                                <Button text="Crear cuenta" onAction="#crear"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                </tabs>
+            </TabPane>
+            <Label fx:id="mensaje" wrapText="true"/>
+        </VBox>
+    </content>
+    <buttonTypes><ButtonType fx:constant="CLOSE"/></buttonTypes>
+</DialogPane>
