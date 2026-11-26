@@ -80,8 +80,6 @@ Como usuario de la aplicación, quiero ver un gráfico de los gastos por categor
 - Dados dos gastos de alimentación de 25 € y 15 € y un gasto de transporte de 10 €, cuando consulto el gráfico de barras o circular, entonces los valores representados corresponden a 40 € en alimentación y 10 € en transporte.
 - Dados esos mismos gastos, cuando filtro por «Transporte», entonces el gráfico representa únicamente los 10 € de transporte.
 
-El enunciado también propone valorar una vista de calendario como posible visualización avanzada.
-
 ## Alertas y notificaciones
 
 ### HU-09 — Configurar un límite de gasto
@@ -110,59 +108,6 @@ Como usuario de la aplicación, quiero consultar notificaciones pasadas para rev
 **Criterio de aceptación**
 
 - Dada una notificación generada anteriormente, cuando consulto el historial, incluso después de reiniciar la aplicación, entonces puedo volver a leerla.
-
-## Cuentas compartidas
-
-### HU-12 — Crear una cuenta compartida con reparto equitativo
-
-Como usuario de la aplicación, quiero crear una cuenta compartida indicando los nombres de sus integrantes para repartir los gastos a partes iguales por defecto.
-
-**Criterios de aceptación**
-
-- Cuando creo una cuenta compartida con Raquel, Luis y María mediante sus nombres y sin indicar porcentajes, entonces la cuenta se guarda con esas tres personas, reparto equitativo y saldo inicial de 0 € para cada una.
-- Dada una cuenta compartida ya creada, su lista de integrantes permanece fija. No se puede añadir, eliminar ni sustituir a una persona de esa cuenta.
-
-### HU-13 — Crear una cuenta compartida con porcentajes personalizados
-
-Como usuario de la aplicación, quiero indicar qué porcentaje del gasto asume cada integrante para reflejar un reparto acordado.
-
-**Criterios de aceptación**
-
-- Cuando creo una cuenta con un reparto del 40 % para Raquel, el 30 % para Luis y el 30 % para María, entonces la cuenta queda guardada con esos porcentajes y saldos iniciales de 0 €.
-- Cuando intento crear una cuenta con porcentajes que suman el 90 % o el 110 %, entonces la cuenta no se crea, porque el reparto debe sumar el 100 %.
-
-### HU-14 — Registrar un gasto en una cuenta compartida
-
-Como usuario de la aplicación, quiero registrar un gasto indicando qué integrante lo ha pagado para que se actualice lo que debe o se le debe a cada persona.
-
-**Criterios de aceptación**
-
-- Dada una cuenta compartida, cuando registro un gasto en ella, entonces el pago queda asociado a uno de sus integrantes. Una persona ajena a la cuenta no puede figurar como pagadora.
-- Dada una cuenta de reparto equitativo con Raquel, Luis y María y saldos iniciales de 0 €, cuando Raquel paga 30 €, entonces los saldos quedan en +20 €, −10 € y −10 €, respectivamente.
-- Dados esos saldos, cuando Luis paga otros 9 €, entonces los saldos de Raquel, Luis y María quedan en +17 €, −7 € y −13 €, respectivamente.
-- Dada una cuenta con porcentajes del 40 %, 30 % y 30 % para Raquel, Luis y María respectivamente y saldos iniciales de 0 €, cuando Raquel paga 30 €, entonces los saldos quedan en +18 €, −9 € y −9 €, respectivamente.
-
-### HU-15 — Consultar los saldos de una cuenta compartida
-
-Como usuario de la aplicación, quiero ver el saldo de cada integrante para saber quién debe dinero y a quién se le debe.
-
-**Criterio de aceptación**
-
-- Dada una cuenta con gastos registrados, cuando consulto sus saldos, incluso después de reiniciar la aplicación, entonces puedo ver el saldo de cada integrante. Un saldo positivo indica cuánto se le debe, uno negativo indica cuánto debe y un saldo cero indica que no tiene importe pendiente.
-
-## Importación
-
-### HU-16 — Importar gastos desde un fichero
-
-Como usuario de la aplicación, quiero importar gastos desde un fichero de texto para incorporar apuntes de una fuente externa sin introducirlos manualmente.
-
-**Criterios de aceptación**
-
-- Dado un fichero bancario válido en un formato admitido, cuando lo importo, entonces sus gastos se incorporan a la aplicación y se pueden consultar en la lista.
-- Dado el fichero de ejemplo de Aula Virtual, cuento sus registros de gasto (excluyendo cabeceras) y anoto ese número como N. Si antes hay M gastos, tras importarlo una vez deben figurar M + N. Compruebo que los importes y fechas de los apuntes incorporados coinciden con sus registros de origen y que los M anteriores se conservan.
-- Dados gastos importados, cuando reinicio la aplicación, entonces siguen disponibles para su consulta.
-
-Para repetir la prueba con otro formato admitido, se usan archivos de prueba equivalentes con los mismos movimientos y se comparan sus resultados partiendo del mismo estado inicial. La aplicación debe estar preparada para incorporar otros formatos de origen.
 
 ## Referencia para el diagrama de interacción
 
