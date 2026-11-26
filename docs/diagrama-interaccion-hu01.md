@@ -2,48 +2,37 @@
 
 Como usuario, quiero registrar un gasto con su importe, fecha y categoría para llevar un control de mis gastos.
 
-El diagrama de secuencia UML representa el registro desde la interfaz gráfica. Los mensajes se leen de arriba abajo. Los nombres de los participantes indican responsabilidades de diseño y los bloques de alternativas distinguen el resultado de cada validación.
-
 **Precondición.** El usuario ha abierto el formulario y dispone de al menos una categoría registrada.
 
 ```mermaid
 sequenceDiagram
-    actor U as Usuario
-    participant V as Formulario JavaFX
+    participant V as GastosViewController
     participant C as GestionGastos
-    participant R as Repositorio de gastos
-    U->>V: Introducir importe y fecha, elegir categoría y guardar
+    participant G as RepositorioGastos
+    participant E as EvaluadorAlertas
+    participant A as RepositorioAlertas
     V->>C: registrarGasto(importe, fecha, categoria)
-    C->>C: comprobarCategoria(categoria)
-    alt Categoría sin registrar
-        C-->>V: Categoría inválida
-        V-->>U: Indicar que debe elegir una categoría registrada
-    else Categoría registrada
-        create participant G as gasto de tipo Gasto
-        C->>G: Crear Gasto(importe, fecha, categoria)
-        G->>G: actualizarDatos(importe, fecha, categoria)
-        alt Datos inválidos
-            G-->>C: Error de validación
-            C-->>V: Datos inválidos
-            V-->>U: Mostrar el error para corregir los datos
-        else Datos válidos
-            G-->>C: Gasto creado
-            C->>R: agregar(gasto)
-            Note over R: Escribe el gasto y evalúa las alertas en una transacción
-            alt Escritura confirmada
-                R-->>C: Guardado correcto
-                C-->>V: Gasto registrado
-                V-->>U: Mostrar el gasto en la lista
-            else Fallo de escritura
-                R-->>C: Error de persistencia
-                C-->>V: Propagar el error de persistencia
-            end
+    C->>C: Comprobar la categoría y construir el gasto
+    Note over C,A: Inicio de la transacción
+    C->>G: agregar(gasto)
+    C->>G: listar()
+    G-->>C: Gastos registrados
+    C->>A: listar()
+    A-->>C: Alertas configuradas
+    loop Por cada alerta
+        C->>E: evaluar(alerta, gasto, null, registrados)
+        opt El total cruza el límite
+            E-->>C: Notificación
+            C->>A: guardarNotificacion(alerta, notificacion)
         end
     end
+    Note over C,A: Confirmación de la transacción
+    C-->>V: Gasto registrado
+    V->>V: Actualizar la tabla
 ```
 
-**Postcondición de éxito.** El gasto queda almacenado con el importe, la fecha y la categoría indicados. Si el usuario cierra y vuelve a abrir la aplicación, puede consultarlo en la lista.
+**Validación.** El controlador comprueba que la categoría esté registrada. El constructor de `Gasto` valida los datos del apunte. Si algún dato es inválido, la vista muestra el error y el alta se interrumpe antes de escribir en el repositorio.
 
-**Comprobación de la HU-01.** Dada la categoría «Transporte», cuando el usuario guarda un gasto de 15 € del 24 de noviembre de 2026, entonces aparece un apunte con esos tres datos y sigue disponible tras reiniciar la aplicación.
+**Postcondición.** El gasto y los avisos que haya generado quedan guardados en la misma transacción. Si falla una escritura en SQLite, se revierten los cambios de esa operación.
 
-**Alcance.** El repositorio representa el contrato de persistencia. Su implementación JDBC solo devuelve éxito tras completar la escritura. La recuperación al reiniciar se comprueba mediante el segundo criterio de [HU-01](historias-de-usuario.md), en una ejecución posterior.
+**Comprobación de la [HU-01](historias-de-usuario.md).** Al registrar un gasto de 15 € del 24 de noviembre de 2026 en «Transporte», la tabla muestra el importe, la fecha y la categoría. El apunte se conserva al volver a abrir la aplicación.
