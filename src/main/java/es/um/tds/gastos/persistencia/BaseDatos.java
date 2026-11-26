@@ -94,7 +94,23 @@ public final class BaseDatos implements GestorTransacciones {
                         ambito TEXT NOT NULL, limite TEXT NOT NULL, total TEXT NOT NULL)
                     """);
                 orden.executeUpdate("CREATE INDEX IF NOT EXISTS gastos_fecha ON gastos(fecha)");
-                orden.execute("PRAGMA user_version = 2");
+                orden.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS cuentas (
+                        id TEXT PRIMARY KEY NOT NULL, nombre TEXT NOT NULL, reparto TEXT NOT NULL)
+                    """);
+                orden.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS integrantes (
+                        cuenta_id TEXT NOT NULL REFERENCES cuentas(id), nombre TEXT NOT NULL,
+                        peso TEXT NOT NULL, posicion INTEGER NOT NULL,
+                        PRIMARY KEY(cuenta_id,nombre), UNIQUE(cuenta_id,posicion))
+                    """);
+                orden.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS pagos (
+                        id INTEGER PRIMARY KEY, cuenta_id TEXT NOT NULL, pagador TEXT NOT NULL,
+                        importe TEXT NOT NULL,
+                        FOREIGN KEY(cuenta_id,pagador) REFERENCES integrantes(cuenta_id,nombre))
+                    """);
+                orden.execute("PRAGMA user_version = 3");
                 conexion.commit();
             } catch (SQLException | RuntimeException e) {
                 conexion.rollback();
