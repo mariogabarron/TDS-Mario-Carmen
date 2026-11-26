@@ -3,6 +3,7 @@ package es.um.tds.gastos;
 import java.util.Objects;
 
 import es.um.tds.gastos.controlador.GestionGastos;
+import es.um.tds.gastos.controlador.GestionCuentas;
 import es.um.tds.gastos.vista.SceneManager;
 
 public abstract class Configuracion {
@@ -26,6 +27,8 @@ public abstract class Configuracion {
         }
         return instancia;
     }
+
+    public abstract GestionCuentas getGestionCuentas();
 
     public abstract GestionGastos getGestionGastos();
 
