@@ -2,7 +2,7 @@
 
 ## Registrar y consultar gastos
 
-En la parte inferior de la ventana, escribe el importe en euros, elige una fecha y selecciona una categoría. Pulsa **Añadir gasto**. Para crear una categoría, pulsa **Nueva categoría** e introduce su nombre. Para modificar un apunte, selecciona su fila, pulsa **Editar seleccionado**, cambia los datos y guarda. **Eliminar seleccionado** permite borrar el apunte tras confirmar la operación.
+En la parte inferior de la ventana, escribe el importe en euros, elige una fecha y selecciona una categoría. Pulsa **Añadir gasto**. Para crear una categoría, pulsa **Nueva categoría** e introduce su nombre. Para modificar un apunte, selecciona su fila, pulsa **Editar seleccionado**, cambia los datos y pulsa **Guardar cambios**. **Eliminar seleccionado** permite borrar el apunte tras confirmar la operación.
 
 ![Tabla con tres gastos y formulario de alta](imagenes/gastos.png)
 
@@ -10,7 +10,7 @@ Selecciona meses o categorías, o indica las fechas **Desde** y **Hasta**, y pul
 
 ## Configurar una alerta
 
-Pulsa **Configurar alertas**, introduce el límite y selecciona la periodicidad semanal o mensual. Mantén marcada **Todas las categorías** para controlar el gasto general. Para controlar una sola, desmarca la casilla y elige la categoría. Pulsa **Crear alerta**.
+Pulsa **Configurar alertas**, introduce el límite y selecciona la periodicidad semanal o mensual. Mantén marcada **Todas las categorías** para controlar el gasto general. Para controlar una sola, desmarca la casilla y elige la categoría. Pulsa **Crear alerta**. La nueva alerta aparece en **Alertas configuradas**.
 
 ## Consultar un aviso
 
